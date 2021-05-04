@@ -2,6 +2,7 @@ const {
     listAllChannels,
     createNewChannel,
     showChannel,
+    showChannelWithUser,
     updateChannel,
     deleteChannel,
 } = require('../models/channel_model');
@@ -35,14 +36,17 @@ exports.create = (req, res) => {
 
 exports.show = (req, res) => {
     const channelId = req.params.channelId;
+    const userId = req.params.userId;
 
-    return showChannel(channelId)
+    return showChannel(channelId, userId)
         .then(channel => res.status(200).json(channel))
         .catch(({code, err}) => {
             if(code === 404) {
                 return res.status(404).json({message: 'resource_not_found'})
             }
-
+            else if(code === 403){
+                return res.status(403).json({message: "doesn't have access to this channel !"})                
+            }
             return res.status(500).json({message: err});
         });
 };

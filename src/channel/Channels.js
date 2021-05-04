@@ -44,6 +44,7 @@ const styles = {
 const Channels = ({ handleClick }) => {
 	const [channels, setChannels] = useState([]); //Initialiser à vide avant de pouvoir les récuperer
 	const [channelName, setChannelName] = useState('');	
+	const [channelOwner, setChannelOwner] = useState('');	
 	const [channelMember, setChannelMember] = useState('')
 	const [channelMembers, setChannelMembers] = useState([]);
 	const [message, setMessage] = useState('');	
@@ -54,10 +55,7 @@ const Channels = ({ handleClick }) => {
 	useEffect(() => {
 		axios.get('http://localhost:8000/api/v1/channels', {
 		}).then(response => {
-			const members = response.data[0].members
-			const channels = response.data[0]
-			const channels = response.data[0].filter(channel => channel.members.includes(user.name) == true)
-			console.log(channels)
+			//const myChannels = response.data.filter(channel => channel.members.includes(user.name))
 			setChannels(response.data);
 		})
 	}, []);
@@ -68,9 +66,11 @@ const Channels = ({ handleClick }) => {
 	);
 
 	const onSubmit = () => {
-		console.log(channelMembers)
+		setChannelOwner(user.id);
+
 		axios.post('http://localhost:8000/api/v1/channels', {
 			name: channelName,
+			owner: channelOwner,
 			members: channelMembers,
 		});
 
@@ -90,11 +90,16 @@ const Channels = ({ handleClick }) => {
 	};
 
 	const addMember = () => {
-		setChannelMembers([
-			...channelMembers,
-			channelMember
-		])
-		setMessage(channelMember + ' added!')
+		//On va chercher le userId avec son email		
+		axios.get('http://localhost:8000/api/v1/users/' + channelMember, {
+		}).then(response => {
+			//On set le channel members avec l'ID
+			setChannelMembers([
+				...channelMembers,
+				response.data
+			])
+			setMessage('member added!')
+		})
 	};
 
 	return (
@@ -136,7 +141,7 @@ const Channels = ({ handleClick }) => {
 					</div>
 
 					<div style={styles.infoChannel}>
-						<label for="channel">Member name :</label><br />
+						<label for="channel">Member email :</label><br />
 						<input
 							type="text"
 							onChange={(e) => {setChannelMember(e.target.value)}}

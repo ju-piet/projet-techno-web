@@ -31,7 +31,7 @@ export default function App() {
     return (
         <div className="app" style={styles.root}>
             <UserContext.Provider value={user}>
-                <Header />
+                <Header setToken={setToken} setUser={setUser} />
                 <Main />
                 <Footer />
             </UserContext.Provider>

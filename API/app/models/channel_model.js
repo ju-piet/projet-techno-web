@@ -30,6 +30,7 @@ const createNewChannel = body => {
         const channel = {
             id: uuid(),
             name: body.name,
+            owner: body.owner,
             members: body.members
         };
 
@@ -48,7 +49,7 @@ const createNewChannel = body => {
     });
 };
 
-const showChannel = channelId => {
+const showChannel = ({channelId, userId}) => {
     //on a un code asynchrone, on va donc utiliser les promesses pour nous simplifier la vie...
     //https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Promise
     //https://developer.mozilla.org/fr/docs/Web/JavaScript/Guide/Utiliser_les_promesses
@@ -67,7 +68,16 @@ const showChannel = channelId => {
                 return;
             }
 
-            resolve(JSON.parse(value));
+            const members = value.members;
+            const owner = value.owner;
+
+            if(members.includes(userId) || owner === userId){
+                resolve(JSON.parse(value));
+            }
+
+            else{
+                resolve({code: 403})
+            }
         });
     });
 };

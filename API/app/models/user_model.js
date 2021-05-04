@@ -130,6 +130,30 @@ const showUser = userId => {
     });
 };
 
+const showUserByEmail = userEmail => {
+    //on a un code asynchrone, on va donc utiliser les promesses pour nous simplifier la vie...
+    //https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Promise
+    //https://developer.mozilla.org/fr/docs/Web/JavaScript/Guide/Utiliser_les_promesses
+    return new Promise((resolve, reject) => {
+        db.get(`usersEmail:${userEmail}`, (err, value) => {
+            if (err) {
+                //https://github.com/Level/level#get
+                //Niveau code, on peut mieux faire ;)
+                if (err.notFound) {
+                    reject({ code: 404 })
+                } else {
+                    reject({ code: 500, err });
+                }
+
+                //Le reject de la promesse ne termine pas l'opération
+                return;
+            }
+
+            resolve(value);
+        });
+    });
+};
+
 const updateUser = (userId, body) => {
     return new Promise((resolve, reject) => {
         db.get(`users:${userId}`, (err, value) => {
@@ -206,4 +230,5 @@ module.exports = {
     showUser,
     updateUser,
     deleteUser,
+    showUserByEmail,
 };

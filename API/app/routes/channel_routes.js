@@ -5,7 +5,7 @@ const channelController = require('../controllers/channel_controller');
 
 router.get('/', channelController.index);
 router.post('/', channelController.create);
-router.get('/:channelId', channelController.show);
+router.get('/:channelId/:userId', channelController.show);
 router.put('/:channelId', channelController.update);
 router.delete('/:channelId', channelController.delete);
 

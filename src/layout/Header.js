@@ -28,9 +28,14 @@ const styles = {
 	},
 };
 
-const Header = () => {
+const Header = ({setUser, setToken}) => {
 
 	const user = useContext(UserContext);
+
+	const logout = () => {
+		setUser(null)
+		setToken('')
+	}
 
 	return (
 		<header className="app-header" style={styles.header}>
@@ -43,7 +48,7 @@ const Header = () => {
 					<Button color="inherit">
 						<AccountCircleIcon />{user.name}
 					</Button>
-					<Button color="inherit">
+					<Button color="inherit" onClick={logout}>
 						<PowerOffIcon /> Logout
 				</Button>
 				</Toolbar>
