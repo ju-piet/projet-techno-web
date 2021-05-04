@@ -1,25 +1,39 @@
-import logo from './logo.svg';
+import React, { useState } from 'react';
 import './App.css';
+import Header from './layout/Header';
+import Main from './layout/Main';
+import Footer from './layout/Footer';
+import Auth from './layout/Auth';
+import {UserContext} from './Contexts'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const styles = {
+    root: {
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: '#565E71',
+        padding: 50
+    },
+    content: {
+        flex: '1 1 auto',
+        marginRight: '.5rem'
+    },
+};
+
+export default function App() {
+    const [token, setToken] = useState('');
+    const [user, setUser] = useState(null);
+
+    if (!token || !user) {
+        return <Auth setToken={setToken} setUser={setUser} />
+    }
+
+    return (
+        <div className="app" style={styles.root}>
+            <UserContext.Provider value={user}>
+                <Header />
+                <Main />
+                <Footer />
+            </UserContext.Provider>
+        </div>);
 }
-
-export default App;
