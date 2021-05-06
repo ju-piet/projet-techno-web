@@ -4,11 +4,13 @@ import Channels from '../channel/Channels';
 
 const styles = {
 	main: {
-		backgroundColor: '#373B44',
+		backgroundColor: '#FAFAD2',
 		flex: '1 1 auto',
 		display: 'flex',
 		flexDirection: 'row',
-		overflow: 'hidden'
+		overflow: 'hidden',
+		borderLeft:'2px solid black',
+		borderRight:'2px solid black'
 	},
 };
 

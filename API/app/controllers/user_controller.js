@@ -7,7 +7,6 @@ const {
     updateUser,
     deleteUser,
 } = require('../models/user_model');
-const jwt = require('jsonwebtoken');
 
 
 exports.index = async (req, res) => {
@@ -125,7 +124,7 @@ exports.update = (req, res) => {
     //Si pas d'erreur au niveau de la requete, on peut procéder à la modification
 
     return updateUser(userId, body)
-        .then(user => res.status(200).json(user))
+        .then(message => res.status(200).json(message))
         .catch(({ code, err }) => {
             if (code === 404) {
                 return res.status(404).json({ message: 'resource_not_found' })

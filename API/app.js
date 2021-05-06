@@ -1,3 +1,5 @@
+console.clear()
+
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -14,13 +16,18 @@ app.get('/', (req, res) => {
     ].join(''));
 });
 
+
+app.use(cors())
+
+
+const verifTok = require("./app/services/token")
+
 const channelRoutes = require('./app/routes/channel_routes');
 const userRoutes = require('./app/routes/user_routes');
 const messageRoutes = require('./app/routes/message_routes');
 
-app.use(cors())
 
-app.use('/api/v1/channels', channelRoutes);
+app.use('/api/v1/channels', verifTok, channelRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1', messageRoutes);
 

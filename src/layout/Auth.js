@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { Button } from '@material-ui/core';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import CheckIcon from '@material-ui/icons/Check';
@@ -35,13 +35,13 @@ const styles = {
     },
 };
 
-export default function Auth({setToken, setUser}) {
+export default function Auth({setUser, setToken}) {
     return (
         <Router>
           <div>
             <Switch>
               <Route exact path="/">
-                <Login setToken={setToken} setUser={setUser} />
+                <Login setUser={setUser} setToken={setToken} />
               </Route>
               <Route path="/register">
                 <Register />
@@ -52,7 +52,7 @@ export default function Auth({setToken, setUser}) {
       );
 }
 
-function Login({setToken, setUser}){
+function Login({setUser, setToken}){
     const [userEmail, setUserEmail] = useState();
     const [userPassword, setUserPassword] = useState();
     const [LoginError, setLoginError] = useState(false);
@@ -63,15 +63,16 @@ function Login({setToken, setUser}){
             password: userPassword
         })
         .then(response => {
-            setToken(
-                response.data.access_token,
-            );
+            // window.localStorage.setItem('token', response.data.access_token);
+            setToken(response.data.access_token)
+            console.log("fezfzefzef")
             setUser(
                 response.data.user,
             );
         })
         .catch(err => {
-            if (err.status == 404) {
+            console.log("aaxax", err)
+            if (err.status === 404) {
                 setLoginError(true);
             }
         })
@@ -138,7 +139,7 @@ function Register() {
             setnewUserPassword('')
         })
         .catch(err => {
-            if (err.status == 404) {
+            if (err.status === 404) {
                 setRegisterError(true);
             }
         })

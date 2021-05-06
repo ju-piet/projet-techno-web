@@ -10,14 +10,17 @@ const {
 
 exports.index = async (req, res) => {
     const channelId = req.params.channelId;
+    const user = res.locals.token.user
 
     try {
-        await showChannel(channelId);
+        await showChannel(channelId, user);
     } catch({code, err}) {
         if(code === 404) {
             return res.status(404).json({message: 'resource_not_found'})
         }
 
+        console.log("juil", err)
+        
         return res.status(500).json({message: err});
     }
 
@@ -32,19 +35,33 @@ exports.create = async (req, res) => {
     //Blindage du body
 
     if(body) {
+
         if(! body.content) {
             return res.status(400).json({message: 'Le contenu du message est obligatoire.'});
+        }
+        if(! body.author) {
+            return res.status(400).json({message: 'L\'auteur du message est obligatoire.'});
         }
 
         //On va vérifier que le channel existe bien !
         if(body.channel_id) {
+
             try {
-                await showChannel(body.channel_id);
-            } catch({code, err}) {
-                if(code === 404) {
+
+                const user = res.locals.token.user
+
+                console.log("moplkk", user)
+                await showChannel(body.channel_id, user);
+            } catch(err) {
+                if(err.code === 404) {
                     return res.status(404).json({message: 'resource_not_found'})
                 }
 
+                if(err.code === 403) {
+                    return res.status(403).json({message: 'forbidden'})
+                }
+
+                console.log("xerr", err)
                 return res.status(500).json({message: err});
             }
         } else {
@@ -53,6 +70,8 @@ exports.create = async (req, res) => {
     } else {
         return res.status(400).json({message: 'bad_request'});
     }
+
+    console.log("MOPOPPP")
 
     return createNewMessage(body)
         .then(message =>  res.status(201).json(message))

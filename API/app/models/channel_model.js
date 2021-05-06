@@ -34,6 +34,8 @@ const createNewChannel = body => {
             members: body.members
         };
 
+        console.log(channel)
+
         //https://github.com/Level/level#put
         // on insère en base de données (ID ==> Channel content)
         db.put(`channels:${channel.id}`, JSON.stringify(channel), (err) => {
@@ -49,13 +51,15 @@ const createNewChannel = body => {
     });
 };
 
-const showChannel = ({channelId, userId}) => {
+const showChannel = (channelId, user) => {
     //on a un code asynchrone, on va donc utiliser les promesses pour nous simplifier la vie...
     //https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Promise
     //https://developer.mozilla.org/fr/docs/Web/JavaScript/Guide/Utiliser_les_promesses
     return new Promise((resolve, reject) => {
         db.get(`channels:${channelId}`, (err, value) => {
             if(err) {
+
+                // console.log(err)
                 //https://github.com/Level/level#get
                 //Niveau code, on peut mieux faire ;)
                 if(err.notFound) {
@@ -68,17 +72,16 @@ const showChannel = ({channelId, userId}) => {
                 return;
             }
 
-            const members = value.members;
-            const owner = value.owner;
+            let channel = JSON.parse(value);
 
-            if(members.includes(userId) || owner === userId){
-                resolve(JSON.parse(value));
-            }
-
-            else{
-                resolve({code: 403})
+            console.log("buser", user.id, channel.owner)
+            if((user && user.id === channel.owner) || (user && channel.members.includes(user.id))){
+                resolve(channel);
+            } else {
+                reject({code: 403, err});
             }
         });
+
     });
 };
 

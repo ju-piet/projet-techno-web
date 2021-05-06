@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 
 const messageController = require('../controllers/message_controller');
+const verifTok = require('../services/token');
+
+router.use(verifTok)
 
 router.get('/channels/:channelId/messages', messageController.index);
 router.post('/messages', messageController.create);

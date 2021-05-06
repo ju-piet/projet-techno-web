@@ -26,10 +26,11 @@ const listAllMessages = async (channelId) => {
     });
 };
 
-const createNewMessage = ({content, channel_id}) => {
+const createNewMessage = body => {
     const message = {
         id: uuid(),
-        content,
+        content: body.content,
+        author: body.author,
         created_at: getUTCFromNow(), //On stock des dates UTC coté serveur !
     };
 
@@ -49,7 +50,7 @@ const createNewMessage = ({content, channel_id}) => {
         // on insère en base de données
         const obj = {
             id: message.id,
-            channel_id
+            channelId : body.channel_id
         };
 
         db.put(`messages:${message.id}`, JSON.stringify(obj), (err) => {
@@ -65,7 +66,7 @@ const createNewMessage = ({content, channel_id}) => {
 
     const promiseRelationshipKey = new Promise((resolve, reject) => {
         // on insère en base de données
-        db.put(`channels:${channel_id}:messages:${message.id}`, JSON.stringify(message), (err) => {
+        db.put(`channels:${body.channel_id}:messages:${message.id}`, JSON.stringify(message), (err) => {
             if(err) {
                 reject({code: 500, err});
 
@@ -101,7 +102,7 @@ const updateMessage = (messageId, body) => {
 
             const mappingMessage = JSON.parse(value);
 
-            db.get(`channels:${mappingMessage.channel_id}:messages:${messageId}`, (err, value) => {
+            db.get(`channels:${mappingMessage.channelId}:messages:${messageId}`, (err, value) => {
                 if(err) {
                     //https://github.com/Level/level#get
                     //Niveau code, on peut mieux faire ;)
@@ -118,7 +119,7 @@ const updateMessage = (messageId, body) => {
                 let message = JSON.parse(value);
                 message.content = body.content;
 
-                db.put(`channels:${mappingMessage.channel_id}:messages:${messageId}`, JSON.stringify(message), (err) => {
+                db.put(`channels:${mappingMessage.channelId}:messages:${messageId}`, JSON.stringify(message), (err) => {
                     if(err) {
                         reject({code: 500, err});
 
@@ -152,7 +153,7 @@ const deleteMessage = async messageId => {
             const mappingMessage = JSON.parse(value);
 
             //On supprime de la db
-            db.del(`channels:${mappingMessage.channel_id}:messages:${mappingMessage.id}`, (err) => {
+            db.del(`channels:${mappingMessage.channelId}:messages:${mappingMessage.id}`, (err) => {
                 if(err) {
                     // handle I/O or other error
                     reject({code: 500, err});

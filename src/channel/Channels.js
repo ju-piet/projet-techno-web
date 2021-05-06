@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useCallback, useContext} from 'react';
-import {UserContext} from '../Contexts'
-import { AppBar, Toolbar, Typography, Button } from '@material-ui/core'
+import {TokenContext, UserContext} from '../Contexts'
+import { AppBar, Toolbar, Typography, Button, TextField } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import axios from 'axios';
 
@@ -9,21 +9,21 @@ const styles = {
 		display: 'flex',
 		flexDirection:'column',
 		justifyContent:'space-between',
-		borderRight: '3px solid white'
+		borderRight: '2px solid black',
+		backgroundColor: '#FFFAF0'	
 	},
-
 	buttons: {
 		display: 'flex',
 		flexDirection:'column',
-	},
-
-	button: {
-		backgroundColor: 'rgba(255,255,255,.3)',
-		color:'white',
-		fontSize:'medium',
 		margin:5,
 	},
-
+	button : {
+		display: 'flex',
+		flexDirection:'column',
+		margin:5,
+		color:'#000000',
+		backgroundColor: '#6495ED'	
+	},
 	toolbar: {
 		width:'fitContent',
 		textAlign: 'center',
@@ -36,8 +36,16 @@ const styles = {
 
 	infoChannel:{
 		display: 'flex',
-		flexDirection:'row',
+		flexDirection:'column',
 		margin:5,
+	},
+	grp:{
+		display: 'flex',
+		flexDirection:'row',
+	},
+	input:{
+		color:'#000000',
+		margin:5
 	}
 };
 
@@ -51,17 +59,30 @@ const Channels = ({ handleClick }) => {
 	const [isActivated, setActivate] = useState(false);	
 
 	const user = useContext(UserContext);
+	const token = useContext(TokenContext);
 
 	useEffect(() => {
-		axios.get('http://localhost:8000/api/v1/channels', {
-		}).then(response => {
+
+		axios.get('http://localhost:8000/api/v1/channels').then(response => {
 			//const myChannels = response.data.filter(channel => channel.members.includes(user.name))
 			setChannels(response.data);
 		})
+		.catch(err => {
+			console.log("caca", err)
+		})
 	}, []);
 
+
+	console.log("before", axios.defaults.headers.common['authorization'])
+
 	const onSelectChannel = useCallback(
-		channel => handleClick(channel),
+		channel => axios.get('http://localhost:8000/api/v1/channels/' + channel.id).then(response => {
+			console.log(response)
+
+			handleClick(response.data)
+			//const myChannels = response.data.filter(channel => channel.members.includes(user.name))
+			//setChannels(response.data);
+		}),
 		[],
 	);
 
@@ -78,6 +99,12 @@ const Channels = ({ handleClick }) => {
 		setChannelMember('');
 		setChannelMembers([]);
 		setActivate(false);
+
+		axios.get('http://localhost:8000/api/v1/channels', {
+		}).then(response => {
+			//const myChannels = response.data.filter(channel => channel.members.includes(user.name))
+			setChannels(response.data);
+		})
 	};
 
 	const createChannel = () => {
@@ -93,6 +120,7 @@ const Channels = ({ handleClick }) => {
 		//On va chercher le userId avec son email		
 		axios.get('http://localhost:8000/api/v1/users/' + channelMember, {
 		}).then(response => {
+			console.log(response.data)
 			//On set le channel members avec l'ID
 			setChannelMembers([
 				...channelMembers,
@@ -108,9 +136,9 @@ const Channels = ({ handleClick }) => {
 			<div style={styles.buttons}>
 				{
 					channels.map(channel => (
-						<button style={styles.button} key={channel.id} onClick={() => onSelectChannel(channel)}>
-							{channel.name}
-						</button>
+						<Button variant="contained" color="primary" key={channel.id} style={styles.button} onClick={() => onSelectChannel(channel)}>
+  							{channel.name}
+						</Button>
 					))
 				}
 			</div>
@@ -128,10 +156,12 @@ const Channels = ({ handleClick }) => {
 				</AppBar>
 
 				{isActivated && (
-				<div>
-					<div style={styles.infoChannel}>
-						<label for="channel">Channel name :</label><br />
-						<input
+				<div style={styles.infoChannel}>
+					<div style={styles.grp}>
+						<TextField 
+							label="Channel name" 
+							variant="outlined"
+							size="small"
 							type="text"
 							onChange={(e) => {setChannelName(e.target.value)}}
 							name="channelName"
@@ -140,25 +170,32 @@ const Channels = ({ handleClick }) => {
 						/>
 					</div>
 
-					<div style={styles.infoChannel}>
-						<label for="channel">Member email :</label><br />
-						<input
-							type="text"
-							onChange={(e) => {setChannelMember(e.target.value)}}
-							name="channelMember"
-							style={styles.input}
-							value={channelMember}
-						/>
-						<button style={styles.button} type="submit" onClick={addMember}>
-							Add a member
-						</button>
+					<div>
+						<div style={styles.grp}>
+							<TextField 
+								label="Member email" 
+								variant="outlined"
+								size="small"
+								type="text"
+								onChange={(e) => {setChannelMember(e.target.value)}}
+								name="channelMember"
+								style={styles.input}
+								value={channelMember}
+							/>
+						</div>
 
-						<p>{message}</p>
+						<div style={styles.grp}>
+							<Button variant="contained" color="primary" style={styles.button} onClick={addMember}>
+								Add a member
+							</Button>
+
+							<p style={styles.input}>{message}</p>
+						</div>
 					</div>
 
-					<button style={styles.button} type="submit" onClick={onSubmit}>
+					<Button variant="contained" color="primary" style={styles.button} onClick={onSubmit}>
 						Add channel
-					</button>
+					</Button>
 				</div>)}
 
 			</div>

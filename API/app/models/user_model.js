@@ -1,6 +1,7 @@
 const { v4: uuid } = require('uuid');
 const db = require('../../db_config');
 const jwt = require('jsonwebtoken');
+const JWT_PRIVATE_KEY = require("../services/parameters").JWT_PRIVATE_KEY
 
 const listAllUsers = async () => {
     return new Promise((resolve, reject) => {
@@ -53,7 +54,7 @@ const loginUser = async (body) => {
                     const user = JSON.parse(value);
     
                     if (body.email == user.email && body.password == user.password) {
-                        jwt.sign({ user }, 'privatekey', { expiresIn: '1h' }, (err, token) => {
+                        jwt.sign({ user }, JWT_PRIVATE_KEY, { expiresIn: '1h' }, (err, token) => {
                             resolve({
                                 access_token: token,
                                 user
@@ -149,7 +150,7 @@ const showUserByEmail = userEmail => {
                 return;
             }
 
-            resolve(value);
+            resolve(JSON.parse(value));
         });
     });
 };
@@ -170,11 +171,9 @@ const updateUser = (userId, body) => {
                 return;
             }
 
-            //L'email n'est pas modifiable (il pourrait, mais faut gérer derriere ...)
-
             let user = JSON.parse(value);
             user.name = body.name;
-            user.password = body.password; //Pour le projet, vous ferez mieux que juste ça ...
+            user.password = body.password; 
 
             //On réécrase dans la db
             db.put(`users:${user.id}`, JSON.stringify(user), (err) => {
@@ -184,7 +183,7 @@ const updateUser = (userId, body) => {
                     return;
                 }
 
-                resolve(user);
+                resolve({ message: 'The user has been changed!'});
             });
         });
     });

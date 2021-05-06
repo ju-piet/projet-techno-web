@@ -1,7 +1,8 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import Messages from '../message/Messages';
 import MessageForm from '../message/MessageForm';
 import axios from 'axios';
+import { TokenContext } from '../Contexts';
 
 const styles = {
 	channel: {
@@ -9,7 +10,7 @@ const styles = {
 		flex: '1 1 auto',
 		display: 'flex',
 		flexDirection: 'column',
-		overflow: 'hidden'
+		overflow: 'hidden',
 	},
 	messages: {
 		flex: '1 1 auto',
@@ -20,31 +21,35 @@ const styles = {
 			'padding': 0,
 			'textIndent': 0,
 			'listStyleType': 0
-		}
+		},
+		color:'#000000',
 	},
 };
 
 const Channel = ({channel}) => {
 	const [messages, setMessages] = useState([]);
+	const token = useContext(TokenContext);
 
 	useEffect(() => {
 		axios.get('http://localhost:8000/api/v1/channels/'+ channel.id +'/messages', {
+			headers: {
+				authorization: "Bearer " + token
+			}
 		}).then(response => {
+			console.log("les message", response.data)
 			setMessages(response.data);
 		})
 	}, [channel]);
 
-	const addMessage = newMessage => {
+	const onAddMessage = newMessage => {
 
-		axios.post('http://localhost:8000/api/v1/messages', {
-			channel_id: channel.id,
-			content: newMessage.content,
-		});
+		// fetch messages
+		axios.get('http://localhost:8000/api/v1/channels/'+ channel.id +'/messages')
+		.then(response => {
+			console.log("dand s", response)
+			setMessages(response.data);
+		})
 
-		setMessages([
-			...messages,
-			newMessage
-		]);
 	};
 
 	const deleteMessage = (messageId) => {
@@ -58,7 +63,7 @@ const Channel = ({channel}) => {
 				<h1>Messages for {channel.name}</h1>
 				<Messages messages={messages} deleteMessage={deleteMessage} />
 			</div>
-			<MessageForm addMessage={addMessage} channel={channel} />
+			<MessageForm onAddMessage={onAddMessage} channel={channel} />
 		</div>
 	);
 };

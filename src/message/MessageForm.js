@@ -1,9 +1,12 @@
-import React, {useState, useContext} from 'react';
-import {UserContext} from '../Contexts'
+import React, {useState, useContext, useEffect} from 'react';
+import {MessageContext, TokenContext, UserContext} from '../Contexts'
+import { Button } from '@material-ui/core'
+import SendIcon from '@material-ui/icons/Send';
+import axios from 'axios';
 
 const styles = {
 	form: {
-		borderTop: '2px solid #373B44',
+		borderTop: '2px solid black',
 		padding: '.5rem',
 		display: 'flex',
 		width:'100%'
@@ -12,10 +15,13 @@ const styles = {
 		width:'100%'
 	},
 	send: {
-		backgroundColor: '#D6DDEC',
+		backgroundColor: '#6495ED',
+		color:'#000000',
 		padding: '.2rem .5rem',
 		border: 'none',
-		width:'150px',
+		width:'100px',
+		marginRight:20,
+		marginLeft:10,
 		':hover': {
 			backgroundColor: '#2A4B99',
 			cursor: 'pointer',
@@ -24,26 +30,68 @@ const styles = {
 	},
 };
 
-const MessageForm = ({addMessage}) => {
-	const [content, setContent] = useState('');
+const MessageForm = ({onAddMessage, channel}) => {
 	const user = useContext(UserContext);
+	const token = useContext(TokenContext);
+	const messageContext = useContext(MessageContext);
+	const {setMessageContent, messageContent, messageId} = messageContext
+
 
 	//You can improve this function with one hook (useCallback) :
 	// https://fr.reactjs.org/docs/hooks-intro.html
 	// https://fr.reactjs.org/docs/hooks-reference.html
 	const onSubmit = () => {
-		addMessage({
-			content,
-			author: user.name,	//Il faudra récupérer le user
-			creation: Date.now(),
-		});
 
-		setContent('');
+		const isUpdating = messageId
+
+		const message = {
+			id: isUpdating ? messageId : undefined,
+			author: user.name,
+			content: messageContent,
+			channel_id: channel.id,
+		}
+
+		if(isUpdating){
+			axios.put('http://localhost:8000/api/v1/messages/' + messageId, {
+				content: message.content
+			})
+			.then(() => {
+				
+				onAddMessage(message);
+				messageContext.setState({
+					...messageContext,
+					messageId: null,
+					messageContent: "",
+				})
+			})
+			.catch(err => {
+				console.log(err)
+			})
+		} 
+
+		// is creating
+		else {
+			axios.post('http://localhost:8000/api/v1/messages', {
+				...message,
+			})
+			.then(() => {
+				
+				onAddMessage(message);
+				setMessageContent('');
+			})
+			.catch(err => {
+				console.log(err)
+			})
+		}
+
+
+
 	};
 
 	//You can improve this function with one hook (useCallback) :
 	const onChange = (e) => {
-		setContent(e.target.value);
+
+		messageContext.setState({...messageContext, messageContent: e.target.value});
 	};
 
 	return (
@@ -53,11 +101,12 @@ const MessageForm = ({addMessage}) => {
 				onChange={onChange}
 				name="content"
 				rows={5}
-				value={content}
+				value={messageContent}
 			/>
-			<button onClick={onSubmit} type="submit" style={styles.send}>
-				Send
-			</button>
+
+			<Button variant="contained" color="primary" style={styles.send} onClick={onSubmit}>
+				<SendIcon fontSize="large"/>
+			</Button>
 		</div>
 	)
 };
