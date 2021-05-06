@@ -90,7 +90,7 @@ exports.showByEmail = (req, res) => {
     const userEmail = req.params.userEmail;
 
     return showUserByEmail(userEmail)
-        .then(userId => res.status(200).json(userId))
+        .then(user => res.status(200).json(user))
         .catch(({ code, err }) => {
             if (code === 404) {
                 return res.status(404).json({ message: 'resource_not_found' })

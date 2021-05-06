@@ -46,17 +46,26 @@ const styles = {
 	input:{
 		color:'#000000',
 		margin:5
+	},
+	positioned: {
+		position: 'absolute',
+		top: '50%',
+		left: '50%',
+		border: '2px solid black',
+		color:'black',
+		backgroundColor: '#FFFAF0'	
 	}
 };
 
 const Channels = ({ handleClick }) => {
 	const [channels, setChannels] = useState([]); //Initialiser à vide avant de pouvoir les récuperer
 	const [channelName, setChannelName] = useState('');	
-	const [channelOwner, setChannelOwner] = useState('');	
 	const [channelMember, setChannelMember] = useState('')
+	const [channelMemberName, setChannelMemberName] = useState([])
 	const [channelMembers, setChannelMembers] = useState([]);
 	const [message, setMessage] = useState('');	
 	const [isActivated, setActivate] = useState(false);	
+	const [isActivatedPopup, setActivatePopup] = useState(false);	
 
 	const user = useContext(UserContext);
 	const token = useContext(TokenContext);
@@ -87,11 +96,14 @@ const Channels = ({ handleClick }) => {
 	);
 
 	const onSubmit = () => {
-		setChannelOwner(user.id);
+		setActivatePopup(true);
+	};
+
+	const publishChannel = () =>{
 
 		axios.post('http://localhost:8000/api/v1/channels', {
 			name: channelName,
-			owner: channelOwner,
+			owner: user.id,
 			members: channelMembers,
 		});
 
@@ -102,10 +114,13 @@ const Channels = ({ handleClick }) => {
 
 		axios.get('http://localhost:8000/api/v1/channels', {
 		}).then(response => {
-			//const myChannels = response.data.filter(channel => channel.members.includes(user.name))
 			setChannels(response.data);
 		})
-	};
+	}
+
+	const cancelpublish = () =>{
+		setActivatePopup(false);
+	}
 
 	const createChannel = () => {
 		if(isActivated === false){
@@ -120,11 +135,15 @@ const Channels = ({ handleClick }) => {
 		//On va chercher le userId avec son email		
 		axios.get('http://localhost:8000/api/v1/users/' + channelMember, {
 		}).then(response => {
-			console.log(response.data)
+			console.log(response.data.name)
 			//On set le channel members avec l'ID
 			setChannelMembers([
 				...channelMembers,
-				response.data
+				response.data.id
+			])
+			setChannelMemberName([
+				...channelMemberName,
+				response.data.name
 			])
 			setMessage('member added!')
 		})
@@ -196,6 +215,25 @@ const Channels = ({ handleClick }) => {
 					<Button variant="contained" color="primary" style={styles.button} onClick={onSubmit}>
 						Add channel
 					</Button>
+
+					{isActivatedPopup && (
+					<div style={styles.positioned}>
+						<p>Do you want publish this channel ?</p>
+						<div>
+							<p>Name : {channelName}</p>
+							<p>Owner : {user.name}</p>
+							<p>Members : {channelMemberName.join(', ')}</p>
+						</div>
+						<div style={{display:'flex'}}>
+							<Button variant="contained" color="primary" style={styles.button} onClick={publishChannel}>
+								Validate
+							</Button>
+							<Button variant="contained" color="primary" style={styles.button} onClick={cancelpublish}>
+								Cancel
+							</Button>
+						</div>
+					</div>
+					)}
 				</div>)}
 
 			</div>

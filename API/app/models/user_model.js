@@ -150,7 +150,22 @@ const showUserByEmail = userEmail => {
                 return;
             }
 
-            resolve(JSON.parse(value));
+            db.get(`users:${JSON.parse(value)}`, (err, value) => {
+                if (err) {
+                    //https://github.com/Level/level#get
+                    //Niveau code, on peut mieux faire ;)
+                    if (err.notFound) {
+                        reject({ code: 404 })
+                    } else {
+                        reject({ code: 500, err });
+                    }
+    
+                    //Le reject de la promesse ne termine pas l'opération
+                    return;
+                }
+    
+                resolve(JSON.parse(value));
+            });
         });
     });
 };
