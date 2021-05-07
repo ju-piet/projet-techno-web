@@ -19,7 +19,6 @@ const styles = {
 		justifyContent: 'space-between',
 		borderRight: '2px solid black',
 		backgroundColor: '#4169E1',
-		flex: 1,
 	},
 	buttonDay: {
 		display: 'flex',
@@ -78,7 +77,7 @@ const styles = {
 	}
 };
 
-const Channels = ({ handleClick }) => {
+const Channels = ({ handleClick, setError }) => {
 	const [channels, setChannels] = useState([]); //Initialiser à vide avant de pouvoir les récuperer
 	const [channelName, setChannelName] = useState('');
 	const [channelMember, setChannelMember] = useState('')
@@ -87,6 +86,7 @@ const Channels = ({ handleClick }) => {
 	const [message, setMessage] = useState('');
 	const [isActivated, setActivate] = useState(false);
 	const [isActivatedPopup, setActivatePopup] = useState(false);
+	const [error2, setError2] = useState(false);
 
 	const user = useContext(UserContext);
 	const token = useContext(TokenContext);
@@ -96,14 +96,18 @@ const Channels = ({ handleClick }) => {
 		axios.get('http://localhost:8000/api/v1/channels').then(response => {
 			setChannels(response.data);
 		})
-			.catch(err => {
-			})
-	}, [channels]);
+	}, []);
 
 	const onSelectChannel = useCallback(
 		channel => axios.get('http://localhost:8000/api/v1/channels/' + channel.id)
 			.then(response => {
 				handleClick(response.data)
+				setError(false);
+			})
+			.catch(err =>{
+				console.log('yo')
+				console.log(setError)
+				setError(true);
 			}),
 		[],
 	);
@@ -122,16 +126,18 @@ const Channels = ({ handleClick }) => {
 			name: channelName,
 			owner: user.id,
 			members: channelMembers,
-		});
-
-		setChannelName('');
-		setChannelMember('');
-		setChannelMembers([]);
-		setActivate(false);
-
-		axios.get('http://localhost:8000/api/v1/channels', {
-		}).then(response => {
-			setChannels(response.data);
+		})
+		.then(response => {
+			setChannelName('');
+			setChannelMember('');
+			setChannelMembers([]);
+			setActivate(false);
+			setActivatePopup(false);
+	
+			axios.get('http://localhost:8000/api/v1/channels', {
+			}).then(response => {
+				setChannels(response.data);
+			})
 		})
 	}
 
@@ -144,6 +150,7 @@ const Channels = ({ handleClick }) => {
 			setActivate(true);
 		}
 		else {
+			setActivatePopup(false);
 			setActivate(false);
 		}
 	};
@@ -304,6 +311,7 @@ const Channels = ({ handleClick }) => {
 						</div>
 
 						{user.lang === 'EN' && (
+							<div>
 							<Button
 								variant="contained"
 								color="primary"
@@ -312,17 +320,24 @@ const Channels = ({ handleClick }) => {
 							>
 								Add channel
 							</Button>
+
+							{error2 && <p>Veuillez ajouter un nom de chaine</p>}
+							</div>
 						)}
 
 						{user.lang === 'FR' && (
-							<Button
-								variant="contained"
-								color="primary"
-								style={user.isDay ? styles.buttonDay : styles.buttonNight}
-								onClick={onSubmit}
-							>
-								Ajouter un channel
-							</Button>
+							<div>
+								<Button
+									variant="contained"
+									color="primary"
+									style={user.isDay ? styles.buttonDay : styles.buttonNight}
+									onClick={onSubmit}
+								>
+									Ajouter un channel
+								</Button>
+								
+								{error2 && <p>Veuillez ajouter un nom de chaine</p>}
+							</div>
 						)}
 
 						{isActivatedPopup && (

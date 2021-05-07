@@ -88,7 +88,7 @@ export default function Header({ setUser }) {
 			<div>
 				<Switch>
 					<Route exact path="/">
-						<MyHeader setUser={setUser} />
+						<MyHeader setUser={setUser} setContinued={setContinued}/>
 					</Route>
 					<Route path="/invite">
 						<Invite />
@@ -102,7 +102,7 @@ export default function Header({ setUser }) {
 	);
 }
 
-function MyHeader({ setUser }) {
+function MyHeader({ setUser, setContinued}) {
 
 	const user = useContext(UserContext);
 	const [anchorEl, setAnchorEl] = useState(null);
@@ -110,6 +110,7 @@ function MyHeader({ setUser }) {
 
 	const logout = () => {
 		setUser(null)
+		setContinued(false)
 		window.localStorage.removeItem('token');
 	}
 

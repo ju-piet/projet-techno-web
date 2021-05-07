@@ -30,7 +30,6 @@ export default function App() {
     const [token, setToken] = useState(null);
     const [isContinued, setContinued] = useState(false);
 
-
     const options = {
         size: 50,
         default:"./images/pic1.jpg",
@@ -43,7 +42,7 @@ export default function App() {
         }
 
     }, [token])
-
+    console.log('yo', user, isContinued)
 
     if (!token || !user) {
         return <Auth setToken={setToken} setUser={setUser} setContinued={setContinued} />
@@ -61,7 +60,7 @@ export default function App() {
                 <MessageContextProvider>
                     <UserContext.Provider value={user}>
                         <TokenContext.Provider value={token}>
-                            <Header setUser={setUser} />
+                            <Header setUser={setUser} setContinued={setContinued}/>
                             <Main />
                             <Footer />
                         </TokenContext.Provider>

@@ -25,17 +25,16 @@ const styles = {
 };
 
 const Main = () => {
-	const [selectedChannel, setSelectedChannel] = useState({
-		name: 'Fake channel',
-		id: 'fake_id',
-	});
+	const [selectedChannel, setSelectedChannel] = useState(null);
+	const [error, setError] = useState(false);
 
 	const user = useContext(UserContext)
+	console.log('main', error)
 
 	return (
 		<main className='app-main' style={user.isDay ? styles.mainDay : styles.mainNight}>
-			<Channels handleClick={setSelectedChannel} />
-			<Channel channel={selectedChannel} />
+			<Channels handleClick={setSelectedChannel} setError={setError} />
+			<Channel channel={selectedChannel} error={error}/>
 		</main>
 	);
 };
