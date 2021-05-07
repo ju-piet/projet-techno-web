@@ -30,7 +30,6 @@ export default function App() {
     const [token, setToken] = useState(null);
     const [isContinued, setContinued] = useState(false);
 
-    console.log(user)
 
     const options = {
         size: 50,

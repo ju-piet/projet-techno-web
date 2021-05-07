@@ -50,6 +50,38 @@ const styles = {
 	},
 };
 
+
+const texts = {
+
+	"FR": {
+		"label1": "Nom de l'utilisateur",
+		"label2": "label2 fr",
+		"button1": "button1 fr",
+		"quit": "quit fr",
+
+		"p1": "p1",
+		"darkmode": "darkmode fr",
+		"lalangue": "Francais",
+		"lalangue2": "Anglais",
+		"valider": "valider fr",
+
+	},
+
+	"EN": {
+		"label1": "Username",
+		"label2": "label2",
+		"button1": "button1",
+		"quit": "quit",
+
+
+		"p1": "p1",
+		"darkmode": "darkmode",
+		"lalangue": "French",
+		"lalangue2": "English",
+		"valider": "valider",
+	},
+}
+
 export default function Header({ setUser }) {
 	return (
 		<Router>
@@ -322,6 +354,8 @@ function ChangeUserInfo({ setUser }) {
 				lang: 'EN'
 			})
 		}
+
+
 	};
 
 	const validateChange = () => {
@@ -345,13 +379,16 @@ function ChangeUserInfo({ setUser }) {
 			.catch((error) => setMessage(error.response.data.message));
 	}
 
+	console.log("HEADER", user)
+
 	return (
 		<div style={{ display: 'flex', justifyContent: 'space-between' }}>
-			{user.lang === 'EN' && (
+
+
 				<div style={user.isDay ? styles.inviteDay : styles.inviteNight}>
 					<TextField
 						style={{ width: 375, margin: 5 }}
-						label="New name"
+						label={texts[user.lang]["label1"]}
 						variant="outlined"
 						size="small"
 						type="text"
@@ -362,7 +399,7 @@ function ChangeUserInfo({ setUser }) {
 
 					<TextField
 						style={{ width: 375, margin: 5 }}
-						label="New password"
+						label={texts[user.lang]["label2"]}
 						variant="outlined"
 						size="small"
 						type="password"
@@ -377,7 +414,7 @@ function ChangeUserInfo({ setUser }) {
 						style={user.isDay ? { backgroundColor: '#6495ED', width: 375, margin: 5 } : { backgroundColor: '#663399', width: 375, margin: 5 }}
 						onClick={changeUser}
 					>
-						Change
+						{texts[user.lang]["button1"]}
 					</Button>
 
 					<Link to="/">
@@ -386,78 +423,32 @@ function ChangeUserInfo({ setUser }) {
 							color="primary"
 							style={user.isDay ? { backgroundColor: '#6495ED', width: 375, margin: 5 } : { backgroundColor: '#663399', width: 375, margin: 5 }}
 						>
-							Quit
+							{texts[user.lang]["quit"]}
 						</Button>
 					</Link>
 					<p>{message}</p>
 				</div>
-			)}
 
-			{user.lang === 'FR' && (
-				<div style={user.isDay ? styles.inviteDay : styles.inviteNight}>
-					<TextField
-						style={{ width: 375, margin: 5 }}
-						label="Nouveau nom"
-						variant="outlined"
-						size="small"
-						type="text"
-						onChange={(e) => { setUserName(e.target.value) }}
-						name="channelMember"
-						value={userName}
-					/>
-
-					<TextField
-						style={{ width: 375, margin: 5 }}
-						label="Nouveau mot de passe"
-						variant="outlined"
-						size="small"
-						type="password"
-						onChange={(e) => { setUserPassword(e.target.value) }}
-						name="channelMember"
-						value={userPassword}
-					/>
-
-					<Button
-						variant="contained"
-						color="primary"
-						style={user.isDay ? { backgroundColor: '#6495ED', width: 375, margin: 5 } : { backgroundColor: '#663399', width: 375, margin: 5 }}
-						onClick={changeUser}
-					>
-						Changer
-					</Button>
-
-					<Link to="/">
-						<Button
-							variant="contained"
-							color="primary"
-							style={user.isDay ? { backgroundColor: '#6495ED', width: 375, margin: 5 } : { backgroundColor: '#663399', width: 375, margin: 5 }}
-						>
-							Quitter
-						</Button>
-					</Link>
-					<p>{message}</p>
-				</div>
-			)}
-
-			{user.lang === 'EN' && (
 				<div style={user.isDay ? styles.inviteDay : styles.inviteNight}>
 					<div style={styles.switch}>
-						<p>Light Mode</p>
+						<p>{texts[user.lang]["p1"]}</p>
 						<SwitchCompo
 							onChange={handleChangeMode}
 							name="isDay"
+							checked={!user.isDay}
 							inputProps={{ 'aria-label': 'secondary checkbox' }}
 						/>
-						<p>Dark Mode</p>
+						<p>{texts[user.lang]["darkmode"]}</p>
 					</div>
 					<div style={styles.switch}>
-						<p>English</p>
+						<p>{texts[user.lang]["lalangue"]}</p>
 						<SwitchCompo
 							onChange={handleChangeLang}
+							checked={user.lang === "FR"}
 							name="language"
 							inputProps={{ 'aria-label': 'secondary checkbox' }}
 						/>
-						<p>French</p>
+						<p>{texts[user.lang]["lalangue2"]}</p>
 					</div>
 					<Button
 						variant="contained"
@@ -465,41 +456,10 @@ function ChangeUserInfo({ setUser }) {
 						style={user.isDay ? { backgroundColor: '#6495ED', width: 230 } : { backgroundColor: '#663399', width: 230 }}
 						onClick={validateChange}
 					>
-						Validate
+						{texts[user.lang]["valider"]}
 					</Button>
 				</div>
-			)}
 
-			{user.lang === 'FR' && (
-				<div style={user.isDay ? styles.inviteDay : styles.inviteNight}>
-					<div style={styles.switch}>
-						<p>Mode clair</p>
-						<SwitchCompo
-							onChange={handleChangeMode}
-							name="isDay"
-							inputProps={{ 'aria-label': 'secondary checkbox' }}
-						/>
-						<p>Mode sombre</p>
-					</div>
-					<div style={styles.switch}>
-						<p>Anglais</p>
-						<SwitchCompo
-							onChange={handleChangeLang}
-							name="language"
-							inputProps={{ 'aria-label': 'secondary checkbox' }}
-						/>
-						<p>Français</p>
-					</div>
-					<Button
-						variant="contained"
-						color="primary"
-						style={user.isDay ? { backgroundColor: '#6495ED', width: 230 } : { backgroundColor: '#663399', width: 230 }}
-						onClick={validateChange}
-					>
-						Valider
-					</Button>
-				</div>
-			)}
 		</div>
 	);
 };
