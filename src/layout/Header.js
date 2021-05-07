@@ -82,7 +82,7 @@ const texts = {
 	},
 }
 
-export default function Header({ setUser }) {
+export default function Header({ setUser, setContinued}) {
 	return (
 		<Router>
 			<div>
