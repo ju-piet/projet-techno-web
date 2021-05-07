@@ -36,7 +36,7 @@ const createNewChannel = body => {
             members: body.members
         };
 
-        console.log(channel)
+        console.log('yo', channel)
 
         //https://github.com/Level/level#put
         // on insère en base de données (ID ==> Channel content)

@@ -23,7 +23,7 @@ const verifTok = (req, res, next) => {
 
     //verification du token 
     jwt.verify(token, JWT_PRIVATE_KEY, (err) => {
-        console.log(err)
+        console.log('token',err)
         if(err){
             return res.status(401).json({message: 'mauvais token'})
         } else {

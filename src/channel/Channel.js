@@ -38,32 +38,31 @@ const styles = {
 	},
 };
 
-const Channel = ({channel}) => {
+const Channel = ({channel, error}) => {
 	const [messages, setMessages] = useState([]);
 	const token = useContext(TokenContext);
 	const user = useContext(UserContext);
 
 	useEffect(() => {
-		axios.get('http://localhost:8000/api/v1/channels/'+ channel.id +'/messages', {
-			headers: {
-				authorization: "Bearer " + token
-			}
-		}).then(response => {
-			if(user.id===channel.owner || channel.members.includes(user.id)){
-				console.log("les message", response.data)
-				setMessages(response.data);
-			}
-			else{
-				setMessages("You doesn't have access to this channel!");
-			}
-		})
+		if(channel){
+			axios.get('http://localhost:8000/api/v1/channels/'+ channel.id +'/messages', {
+				headers: {
+					authorization: "Bearer " + token
+				}
+			})
+			.then(response => {
+				if(user.id===channel.owner || channel.members.includes(user.id)){
+					console.log("les message", response.data)
+					setMessages(response.data);
+				}
+			})
+		}
 	}, [channel]);
 
 	const onAddMessage = newMessage => {
 		// fetch messages
 		axios.get('http://localhost:8000/api/v1/channels/'+ channel.id +'/messages')
 		.then(response => {
-			console.log("dand s", response)
 			setMessages(response.data);
 		})
 
@@ -72,6 +71,34 @@ const Channel = ({channel}) => {
 	const deleteMessage = (messageId) => {
 		const currentMessages = messages.filter(message => message.id !== messageId)
 		setMessages(currentMessages);
+	}
+
+	if(error){
+		return(
+			<div>
+				{user.lang === 'EN' && (
+					<h1 style={{color:'black'}}>You doesn't have access to this channel</h1>
+				)}
+
+				{user.lang === 'FR' && (
+					<h1 style={{color:'black'}}>Vous n'avez pas accès à cette chaine</h1>
+				)}
+			</div>
+		)
+	}
+
+	if(!channel){
+		return(
+			<div>
+				{user.lang === 'EN' && (
+					<h1 style={{color:'black'}}>Please, select a channel</h1>
+				)}
+
+				{user.lang === 'FR' && (
+					<h1 style={{color:'black'}}>S'il vous plait, veuillez sélectionner une chaine</h1>
+				)}
+			</div>
+		)
 	}
 
 	return (
