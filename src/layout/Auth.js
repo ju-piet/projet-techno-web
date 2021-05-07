@@ -13,35 +13,34 @@ import {
 
 const styles = {
     header: {
-        backgroundColor: '#373B44',
+        backgroundColor: '#3f51b5',
         textAlign: 'center',
+        height:'50px',
         flexShrink: 0
     },
     form: {
-        backgroundColor: 'rgba(255,255,255,.3)',
+        backgroundColor: '#FAFAD2',
         textAlign: 'center',
         padding: '20px',
-        flexShrink: 0
+        flexShrink: 0,
     },
     input: {
         marginBottom: '10px'
     },
     buttonSignIn: {
-        color: 'white',
-        backgroundColor: '#373B44',
-    },
-    buttonSignUp: {
         color: 'black',
+        backgroundColor: '#6495ED',
+        margin:5
     },
 };
 
-export default function Auth({setUser, setToken}) {
+export default function Auth({setUser, setToken, setContinued}) {
     return (
         <Router>
           <div>
             <Switch>
               <Route exact path="/">
-                <Login setUser={setUser} setToken={setToken} />
+                <Login setUser={setUser} setToken={setToken} setContinued={setContinued} />
               </Route>
               <Route path="/register">
                 <Register />
@@ -52,7 +51,7 @@ export default function Auth({setUser, setToken}) {
       );
 }
 
-function Login({setUser, setToken}){
+function Login({setUser, setToken, setContinued}){
     const [userEmail, setUserEmail] = useState();
     const [userPassword, setUserPassword] = useState();
     const [LoginError, setLoginError] = useState(false);
@@ -63,15 +62,13 @@ function Login({setUser, setToken}){
             password: userPassword
         })
         .then(response => {
-            // window.localStorage.setItem('token', response.data.access_token);
             setToken(response.data.access_token)
-            console.log("fezfzefzef")
             setUser(
                 response.data.user,
             );
+            setContinued(false)
         })
         .catch(err => {
-            console.log("aaxax", err)
             if (err.status === 404) {
                 setLoginError(true);
             }
@@ -82,7 +79,7 @@ function Login({setUser, setToken}){
         <div>
             
             <header style={styles.header}>
-                <h1>Welcome !</h1>
+                <h1 style={{ color:'white', padding:5 }}>Please log in !</h1>
             </header>
 
             <form style={styles.form}>
@@ -130,7 +127,9 @@ function Register() {
         axios.post('http://localhost:8000/api/v1/users', {
             name: newUserName,
             email: newUserEmail,
-            password: newUserPassword
+            password: newUserPassword,
+            isDay:true,
+            lang:'EN'
         })
         .then(response => {
             setMessage(response.data)
@@ -148,7 +147,7 @@ function Register() {
     return (
         <div>
             <header style={styles.header}>
-                <h1>Registration</h1>
+                <h1 style={{ color:'white' }}>Registration</h1>
             </header>
 
             <form style={styles.form}>

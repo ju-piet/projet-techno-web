@@ -1,71 +1,92 @@
-import React, {useState, useEffect, useCallback, useContext} from 'react';
-import {TokenContext, UserContext} from '../Contexts'
+import React, { useState, useEffect, useCallback, useContext } from 'react';
+import { TokenContext, UserContext } from '../Contexts'
 import { AppBar, Toolbar, Typography, Button, TextField } from '@material-ui/core'
+import DeleteIcon from '@material-ui/icons/Delete';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import axios from 'axios';
 
 const styles = {
-	channels: {
+	channelsDay: {
 		display: 'flex',
-		flexDirection:'column',
-		justifyContent:'space-between',
+		flexDirection: 'column',
+		justifyContent: 'space-between',
 		borderRight: '2px solid black',
-		backgroundColor: '#FFFAF0'	
+		backgroundColor: '#FFFAF0'
 	},
-	buttons: {
+	channelsNight: {
 		display: 'flex',
-		flexDirection:'column',
-		margin:5,
+		flexDirection: 'column',
+		justifyContent: 'space-between',
+		borderRight: '2px solid black',
+		backgroundColor: '#4169E1',
+		flex: 1,
 	},
-	button : {
+	buttonDay: {
 		display: 'flex',
-		flexDirection:'column',
-		margin:5,
-		color:'#000000',
-		backgroundColor: '#6495ED'	
+		flexDirection: 'column',
+		margin: 5,
+		color: '#000000',
+		backgroundColor: '#6495ED'
+	},
+	buttonNight: {
+		display: 'flex',
+		flexDirection: 'column',
+		margin: 5,
+		color: '#ffffff',
+		backgroundColor: '#663399'
 	},
 	toolbar: {
-		width:'fitContent',
+		width: 'fitContent',
 		textAlign: 'center',
 	},
 
-	addChannel:{
+	addChannel: {
 		display: 'flex',
-		flexDirection:'column',
+		flexDirection: 'column',
 	},
 
-	infoChannel:{
+	infoChannel: {
 		display: 'flex',
-		flexDirection:'column',
-		margin:5,
+		flexDirection: 'column',
+		margin: 5,
 	},
-	grp:{
+	grp: {
 		display: 'flex',
-		flexDirection:'row',
+		flexDirection: 'row',
+		margin: 5
 	},
-	input:{
-		color:'#000000',
-		margin:5
+	input: {
+		margin: 5
 	},
-	positioned: {
+	positionedDay: {
 		position: 'absolute',
 		top: '50%',
 		left: '50%',
 		border: '2px solid black',
-		color:'black',
-		backgroundColor: '#FFFAF0'	
+		color: 'black',
+		backgroundColor: '#FFFAF0',
+		padding: 10
+	},
+	positionedNight: {
+		position: 'absolute',
+		top: '50%',
+		left: '50%',
+		border: '2px solid black',
+		color: 'white',
+		backgroundColor: '#4169E1',
+		padding: 10
 	}
 };
 
 const Channels = ({ handleClick }) => {
 	const [channels, setChannels] = useState([]); //Initialiser à vide avant de pouvoir les récuperer
-	const [channelName, setChannelName] = useState('');	
+	const [channelName, setChannelName] = useState('');
 	const [channelMember, setChannelMember] = useState('')
 	const [channelMemberName, setChannelMemberName] = useState([])
 	const [channelMembers, setChannelMembers] = useState([]);
-	const [message, setMessage] = useState('');	
-	const [isActivated, setActivate] = useState(false);	
-	const [isActivatedPopup, setActivatePopup] = useState(false);	
+	const [message, setMessage] = useState('');
+	const [isActivated, setActivate] = useState(false);
+	const [isActivatedPopup, setActivatePopup] = useState(false);
 
 	const user = useContext(UserContext);
 	const token = useContext(TokenContext);
@@ -73,33 +94,29 @@ const Channels = ({ handleClick }) => {
 	useEffect(() => {
 
 		axios.get('http://localhost:8000/api/v1/channels').then(response => {
-			//const myChannels = response.data.filter(channel => channel.members.includes(user.name))
 			setChannels(response.data);
 		})
-		.catch(err => {
-			console.log("caca", err)
-		})
-	}, []);
-
-
-	console.log("before", axios.defaults.headers.common['authorization'])
+			.catch(err => {
+			})
+	}, [channels]);
 
 	const onSelectChannel = useCallback(
-		channel => axios.get('http://localhost:8000/api/v1/channels/' + channel.id).then(response => {
-			console.log(response)
-
-			handleClick(response.data)
-			//const myChannels = response.data.filter(channel => channel.members.includes(user.name))
-			//setChannels(response.data);
-		}),
+		channel => axios.get('http://localhost:8000/api/v1/channels/' + channel.id)
+			.then(response => {
+				handleClick(response.data)
+			}),
 		[],
 	);
+
+	const deleteChannel = (channel) => {
+        axios.delete('http://localhost:8000/api/v1/channels/' + channel.id);
+    }
 
 	const onSubmit = () => {
 		setActivatePopup(true);
 	};
 
-	const publishChannel = () =>{
+	const publishChannel = () => {
 
 		axios.post('http://localhost:8000/api/v1/channels', {
 			name: channelName,
@@ -118,15 +135,15 @@ const Channels = ({ handleClick }) => {
 		})
 	}
 
-	const cancelpublish = () =>{
+	const cancelpublish = () => {
 		setActivatePopup(false);
 	}
 
 	const createChannel = () => {
-		if(isActivated === false){
+		if (isActivated === false) {
 			setActivate(true);
 		}
-		else{
+		else {
 			setActivate(false);
 		}
 	};
@@ -150,14 +167,31 @@ const Channels = ({ handleClick }) => {
 	};
 
 	return (
-		<div style={styles.channels}>
+		<div style={user.isDay ? styles.channelsDay : styles.channelsNight}>
 
-			<div style={styles.buttons}>
+			<div>
 				{
 					channels.map(channel => (
-						<Button variant="contained" color="primary" key={channel.id} style={styles.button} onClick={() => onSelectChannel(channel)}>
-  							{channel.name}
+						<div style={{display:'flex', flexDirection: 'row', alignItems: 'stretch', width: '100%'}}>
+							<Button style={{width:'100%'}}
+								variant="contained"
+								color="primary" 
+								key={'but1' + channel.id}
+								style={user.isDay ? styles.buttonDay : styles.buttonNight}
+								onClick={() => onSelectChannel(channel)}
+							>
+								{channel.name}
+							</Button>
+							<Button 
+								variant="contained"
+								color="primary" 
+								key={'but2' + channel.id}
+								style={{backgroundColor: '#DC143C', color:'#000000'}}
+								onClick={() => deleteChannel(channel)}
+							>
+							<DeleteIcon />
 						</Button>
+						</div>
 					))
 				}
 			</div>
@@ -166,76 +200,194 @@ const Channels = ({ handleClick }) => {
 				<AppBar position="static">
 					<Toolbar>
 						<Typography variant="h7">
-							<Button color="inherit" onClick={createChannel}>
-								<ExpandMoreIcon/>
-								CREATE A NEW CHANNEL
-							</Button>
-    					</Typography>
+							{user.lang === 'EN' && (
+								<Button color="inherit" onClick={createChannel}>
+									<ExpandMoreIcon />
+									CREATE A NEW CHANNEL
+								</Button>
+							)}
+
+							{user.lang === 'FR' && (
+								<Button color="inherit" onClick={createChannel}>
+									<ExpandMoreIcon />
+									CREER UNE NOUVELLE CHAINE
+								</Button>
+							)}
+						</Typography>
 					</Toolbar>
 				</AppBar>
 
 				{isActivated && (
-				<div style={styles.infoChannel}>
-					<div style={styles.grp}>
-						<TextField 
-							label="Channel name" 
-							variant="outlined"
-							size="small"
-							type="text"
-							onChange={(e) => {setChannelName(e.target.value)}}
-							name="channelName"
-							style={styles.input}
-							value={channelName}
-						/>
-					</div>
-
-					<div>
+					<div style={styles.infoChannel}>
 						<div style={styles.grp}>
-							<TextField 
-								label="Member email" 
-								variant="outlined"
-								size="small"
-								type="text"
-								onChange={(e) => {setChannelMember(e.target.value)}}
-								name="channelMember"
-								style={styles.input}
-								value={channelMember}
-							/>
+							{user.lang === 'EN' && (
+								<TextField
+									label="Channel name"
+									variant="outlined"
+									size="small"
+									type="text"
+									onChange={(e) => { setChannelName(e.target.value) }}
+									name="channelName"
+									style={styles.input}
+									value={channelName}
+								/>
+							)}
+
+							{user.lang === 'FR' && (
+								<TextField
+									label="Nom de la chaine"
+									variant="outlined"
+									size="small"
+									type="text"
+									onChange={(e) => { setChannelName(e.target.value) }}
+									name="channelName"
+									style={styles.input}
+									value={channelName}
+								/>
+							)}
 						</div>
 
-						<div style={styles.grp}>
-							<Button variant="contained" color="primary" style={styles.button} onClick={addMember}>
-								Add a member
+						<div >
+							<div>
+								{user.lang === 'EN' && (
+									<TextField
+										label="Member email"
+										variant="outlined"
+										size="small"
+										type="text"
+										onChange={(e) => { setChannelMember(e.target.value) }}
+										name="channelMember"
+										style={styles.input}
+										value={channelMember}
+									/>
+								)}
+
+								{user.lang === 'FR' && (
+									<TextField
+										label="Email du membre"
+										variant="outlined"
+										size="small"
+										type="text"
+										onChange={(e) => { setChannelMember(e.target.value) }}
+										name="channelMember"
+										style={styles.input}
+										value={channelMember}
+									/>
+								)}
+							</div>
+
+							<div >
+								{user.lang === 'EN' && (
+									<Button
+										variant="contained"
+										color="primary"
+										style={user.isDay ? styles.buttonDay : styles.buttonNight}
+										onClick={addMember}
+									>
+										Add a member
+									</Button>
+								)}
+
+								{user.lang === 'FR' && (
+									<Button
+										variant="contained"
+										color="primary"
+										style={user.isDay ? styles.buttonDay : styles.buttonNight}
+										onClick={addMember}
+									>
+										Ajouter un membre
+									</Button>
+								)}
+
+								<p style={styles.input}>{message}</p>
+							</div>
+						</div>
+
+						{user.lang === 'EN' && (
+							<Button
+								variant="contained"
+								color="primary"
+								style={user.isDay ? styles.buttonDay : styles.buttonNight}
+								onClick={onSubmit}
+							>
+								Add channel
 							</Button>
+						)}
 
-							<p style={styles.input}>{message}</p>
-						</div>
+						{user.lang === 'FR' && (
+							<Button
+								variant="contained"
+								color="primary"
+								style={user.isDay ? styles.buttonDay : styles.buttonNight}
+								onClick={onSubmit}
+							>
+								Ajouter un channel
+							</Button>
+						)}
+
+						{isActivatedPopup && (
+							<div style={user.isDay ? styles.positionedDay : styles.positionedNight}>
+								{user.lang === 'EN' && (
+									<div>
+										<p style={{ fontSize: 'large' }}>Do you want add this channel ?</p>
+										<div>
+											<p>Name : {channelName}</p>
+											<p>Owner : {user.name}</p>
+											<p>Members : {channelMemberName.join(', ')}</p>
+										</div>
+										<div style={{ display: 'flex', justifyContent: 'space-between' }}>
+											<Button
+												variant="contained"
+												color="primary"
+												style={user.isDay ? styles.buttonDay : styles.buttonNight}
+												onClick={publishChannel}
+											>
+												Validate
+											</Button>
+											<Button
+												variant="contained"
+												color="primary"
+												style={user.isDay ? styles.buttonDay : styles.buttonNight}
+												onClick={cancelpublish}
+											>
+												Cancel
+											</Button>
+										</div>
+									</div>
+								)}
+
+								{user.lang === 'FR' && (
+									<div>
+										<p style={{ fontSize: 'large' }}>Voulez vous ajouter ce channel ?</p>
+										<div>
+											<p>Nom : {channelName}</p>
+											<p>Créateur : {user.name}</p>
+											<p>Membres : {channelMemberName.join(', ')}</p>
+										</div>
+										<div style={{ display: 'flex', justifyContent: 'space-between' }}>
+											<Button
+												variant="contained"
+												color="primary"
+												style={user.isDay ? styles.buttonDay : styles.buttonNight}
+												onClick={publishChannel}
+											>
+												Valider
+											</Button>
+											<Button
+												variant="contained"
+												color="primary"
+												style={user.isDay ? styles.buttonDay : styles.buttonNight}
+												onClick={cancelpublish}
+											>
+												Annuler
+											</Button>
+										</div>
+									</div>
+								)}
+							</div>
+						)}
 					</div>
-
-					<Button variant="contained" color="primary" style={styles.button} onClick={onSubmit}>
-						Add channel
-					</Button>
-
-					{isActivatedPopup && (
-					<div style={styles.positioned}>
-						<p>Do you want publish this channel ?</p>
-						<div>
-							<p>Name : {channelName}</p>
-							<p>Owner : {user.name}</p>
-							<p>Members : {channelMemberName.join(', ')}</p>
-						</div>
-						<div style={{display:'flex'}}>
-							<Button variant="contained" color="primary" style={styles.button} onClick={publishChannel}>
-								Validate
-							</Button>
-							<Button variant="contained" color="primary" style={styles.button} onClick={cancelpublish}>
-								Cancel
-							</Button>
-						</div>
-					</div>
-					)}
-				</div>)}
-
+				)}
 			</div>
 		</div>
 	);

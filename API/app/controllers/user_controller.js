@@ -63,6 +63,12 @@ exports.create = (req, res) => {
         if (!body.password) {
             return res.status(400).json({ message: 'Le mot de passe est obligatoire.' });
         }
+        if (!body.isDay) {
+            return res.status(400).json({ message: 'Le thème n\'est pas renseigné.' });
+        }
+        if (!body.lang) {
+            return res.status(400).json({ message: 'Le langue n\'est pas renseignée.' });
+        }
     } else {
         return res.status(400).json({ message: 'bad_request' });
     }
@@ -113,9 +119,11 @@ exports.update = (req, res) => {
         if (!body.name) {
             return res.status(400).json({ message: 'Le nom est obligatoire.' });
         }
-
         if (!body.password) {
             return res.status(400).json({ message: 'Le mot de passe est obligatoire.' });
+        }
+        if (!body.lang) {
+            return res.status(400).json({ message: 'Le langue n\'est pas renseignée.' });
         }
     } else {
         return res.status(400).json({ message: 'bad_request' });

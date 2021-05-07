@@ -79,7 +79,9 @@ const createNewUser = body => {
         id: uuid(),
         name: body.name,
         email: body.email,
-        password: body.password, //Pas de password crypté pour le moment, on verra ça plus tard ...
+        password: body.password, 
+        isDay:body.isDay,
+        lang:body.lang
     };
 
     return new Promise((resolve, reject) => {
@@ -189,6 +191,8 @@ const updateUser = (userId, body) => {
             let user = JSON.parse(value);
             user.name = body.name;
             user.password = body.password; 
+            user.isDay = body.isDay;
+            user.lang = body.lang; 
 
             //On réécrase dans la db
             db.put(`users:${user.id}`, JSON.stringify(user), (err) => {

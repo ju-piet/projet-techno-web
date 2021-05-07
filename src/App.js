@@ -6,6 +6,10 @@ import Footer from './layout/Footer';
 import Auth from './layout/Auth';
 import {MessageContextProvider, TokenContext, UserContext} from './Contexts'
 import axios from 'axios';
+import Welcome from './layout/Welcome';
+import Gravatar from 'react-awesome-gravatar';
+import { GravatarOptions } from 'react-awesome-gravatar';
+
 
 const styles = {
     root: {
@@ -24,6 +28,14 @@ const styles = {
 export default function App() {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
+    const [isContinued, setContinued] = useState(false);
+
+    console.log(user)
+
+    const options = {
+        size: 50,
+        default:"./images/pic1.jpg",
+    };
 
     useEffect(() => {
 
@@ -35,19 +47,28 @@ export default function App() {
 
 
     if (!token || !user) {
-        return <Auth setToken={setToken} setUser={setUser} />
+        return <Auth setToken={setToken} setUser={setUser} setContinued={setContinued} />
     }
 
-    return (
-        <div className="app" style={styles.root}>
-            <MessageContextProvider>
-                <UserContext.Provider value={user}>
-                    <TokenContext.Provider value={token}>
-                        <Header setUser={setUser} />
-                        <Main />
-                        <Footer />
-                    </TokenContext.Provider>
-                </UserContext.Provider>
-            </MessageContextProvider>
-        </div>);
+    if(isContinued==false){
+        return (
+            <Welcome setContinued={setContinued} user={user}/>
+        );
+    }
+
+    if(isContinued==true){
+        return (
+            <div className="app" style={styles.root}>
+                <MessageContextProvider>
+                    <UserContext.Provider value={user}>
+                        <TokenContext.Provider value={token}>
+                            <Header setUser={setUser} />
+                            <Main />
+                            <Footer />
+                        </TokenContext.Provider>
+                    </UserContext.Provider>
+                </MessageContextProvider>
+            </div>);
+    }
+
 }

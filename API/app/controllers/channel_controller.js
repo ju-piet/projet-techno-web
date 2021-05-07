@@ -62,8 +62,8 @@ exports.update = (req, res) => {
     //On pourrait faire un blindage sur le nom unique si c'est une spec qu'on veut (complex car faut revoir nos clés lors de la création...)
 
     if(body) {
-        if(! body.name) {
-            return res.status(400).json({message: 'Le nom est obligatoire.'});
+        if(! body.name && ! body.member) {
+            return res.status(400).json({message: 'Le nom du channel oudu membrest obligatoire.'});
         }
     } else {
         return res.status(400).json({message: 'bad_request'});

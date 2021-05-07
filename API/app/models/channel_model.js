@@ -6,14 +6,16 @@ const listAllChannels = async () => {
         const channels = [];
 
         const options = {
-            gt: 'channels:',
-            lte: "channels" + String.fromCharCode(":".charCodeAt(0) + 1),
+            gt: 'channels',
+            lte: "channels" + String.fromCharCode(":".charCodeAt(0) + 1) + ":messages",
         };
 
         //https://github.com/Level/level#createReadStream
         db.createReadStream(options)
             .on('data', ({key, value}) => {
-                channels.push(JSON.parse(value));
+                if(!key.match(/messages/)){
+                    channels.push(JSON.parse(value));
+                }
             })
             .on('error', (err) => {
                 reject(err)
@@ -58,8 +60,6 @@ const showChannel = (channelId, user) => {
     return new Promise((resolve, reject) => {
         db.get(`channels:${channelId}`, (err, value) => {
             if(err) {
-
-                // console.log(err)
                 //https://github.com/Level/level#get
                 //Niveau code, on peut mieux faire ;)
                 if(err.notFound) {
@@ -74,7 +74,6 @@ const showChannel = (channelId, user) => {
 
             let channel = JSON.parse(value);
 
-            console.log("buser", user.id, channel.owner)
             if((user && user.id === channel.owner) || (user && channel.members.includes(user.id))){
                 resolve(channel);
             } else {
@@ -102,7 +101,14 @@ const updateChannel = (channelId, body) => {
             }
 
             let channel = JSON.parse(value);
-            channel.name = body.name; //seul le nom est modifiable
+
+            if(!body.name){
+                channel.members.push(body.member)
+            }
+            else{
+                channel.name = body.name; //seul le nom est modifiable
+                channel.members.push(body.member)
+            }
 
             //On réécrase dans la db
             db.put(`channels:${channel.id}`, JSON.stringify(channel), (err) => {
@@ -112,7 +118,7 @@ const updateChannel = (channelId, body) => {
                     return;
                 }
 
-                resolve(channel);
+                resolve("Member added!");
             });
         });
     });

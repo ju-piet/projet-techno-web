@@ -2,7 +2,7 @@ import React, {useState, useEffect, useContext} from 'react';
 import Messages from '../message/Messages';
 import MessageForm from '../message/MessageForm';
 import axios from 'axios';
-import { TokenContext } from '../Contexts';
+import { TokenContext, UserContext } from '../Contexts';
 
 const styles = {
 	channel: {
@@ -12,7 +12,7 @@ const styles = {
 		flexDirection: 'column',
 		overflow: 'hidden',
 	},
-	messages: {
+	messagesDay: {
 		flex: '1 1 auto',
 		height: '100%',
 		overflow: 'auto',
@@ -24,11 +24,24 @@ const styles = {
 		},
 		color:'#000000',
 	},
+	messagesNight: {
+		flex: '1 1 auto',
+		height: '100%',
+		overflow: 'auto',
+		'& ul': {
+			'margin': 0,
+			'padding': 0,
+			'textIndent': 0,
+			'listStyleType': 0
+		},
+		color:'#ffffff',
+	},
 };
 
 const Channel = ({channel}) => {
 	const [messages, setMessages] = useState([]);
 	const token = useContext(TokenContext);
+	const user = useContext(UserContext);
 
 	useEffect(() => {
 		axios.get('http://localhost:8000/api/v1/channels/'+ channel.id +'/messages', {
@@ -36,13 +49,17 @@ const Channel = ({channel}) => {
 				authorization: "Bearer " + token
 			}
 		}).then(response => {
-			console.log("les message", response.data)
-			setMessages(response.data);
+			if(user.id===channel.owner || channel.members.includes(user.id)){
+				console.log("les message", response.data)
+				setMessages(response.data);
+			}
+			else{
+				setMessages("You doesn't have access to this channel!");
+			}
 		})
 	}, [channel]);
 
 	const onAddMessage = newMessage => {
-
 		// fetch messages
 		axios.get('http://localhost:8000/api/v1/channels/'+ channel.id +'/messages')
 		.then(response => {
@@ -59,8 +76,14 @@ const Channel = ({channel}) => {
 
 	return (
 		<div style={styles.channel}>
-			<div style={styles.messages}>
-				<h1>Messages for {channel.name}</h1>
+			<div style={user.isDay ? styles.messagesDay : styles.messagesNight}>
+				{user.lang === 'EN' && (
+					<h1>Messages for : {channel.name}</h1>
+				)}
+
+				{user.lang === 'FR' && (
+					<h1>Les messages de : {channel.name}</h1>
+				)}
 				<Messages messages={messages} deleteMessage={deleteMessage} />
 			</div>
 			<MessageForm onAddMessage={onAddMessage} channel={channel} />
