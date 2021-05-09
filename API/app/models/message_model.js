@@ -138,15 +138,12 @@ const deleteMessage = async messageId => {
     return new Promise((resolve, reject) => {
         db.get(`messages:${messageId}`, (err, value) => {
             if(err) {
-                //https://github.com/Level/level#get
-                //Niveau code, on peut mieux faire ;)
                 if(err.notFound) {
                     reject({code: 404})
                 } else {
                     reject({code: 500, err});
                 }
 
-                //Le reject de la promesse ne termine pas l'opération
                 return;
             }
 

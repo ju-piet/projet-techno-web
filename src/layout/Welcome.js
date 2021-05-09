@@ -1,6 +1,5 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Button } from '@material-ui/core';
-import { UserContext } from '../Contexts';
 
 const styles = {
     pageDay:{
@@ -28,54 +27,48 @@ const styles = {
     }
 };
 
+const texts = {
+	"FR": {
+		"title": "Bienvenue dans le chat !",
+        "continue":"Continuez!",
+        "please":"Sil vous plait, pour continuer cliquez sur le bouton !"
+	},
+
+	"EN": {
+		"title": "Welcome to the chat!",
+        "continue":"Carry on!",
+        "please":"Please, to continue click on the button !"
+	},
+}
+
+// Lorsqu'on se login, on arrive sur la page welcome
 const Welcome = ({ setContinued, user }) => {
+
+    // Lorsqu'on clique sur le bouton continuez...
     const autoriseContinued = () => {
+        //... on renvoie le state continued en true 
         setContinued(true);
     }
 
+    // On affiche la page welcome
     return (
-        <div >
-            {user.lang === 'EN' && (
-                <div style={user.isDay ? styles.pageDay : styles.pageNight}>
-                    <p style={styles.welcome}>
-                        Welcome to the chat !
-                    </p>
+        <div style={user.isDay ? styles.pageDay : styles.pageNight}>
+            <p style={styles.welcome}>
+                {texts[user.lang]["title"]}
+            </p>
 
-                    <Button
-                        style={user.isDay ? styles.buttonDay : styles.buttonNight}
-                        variant="contained"
-                        color="primary"
-                        onClick={autoriseContinued}
-                    >
-                    Carry on !
-                    </Button>
+            <Button
+                style={user.isDay ? styles.buttonDay : styles.buttonNight}
+                variant="contained"
+                color="primary"
+                onClick={autoriseContinued}
+            >
+                {texts[user.lang]["continue"]}
+            </Button>
 
-                    <p>
-                        Please, to continue click on the button !
-                    </p>
-                </div>
-            )}
-
-            {user.lang === 'FR' && (
-                <div style={user.isDay ? styles.pageDay : styles.pageNight}>
-                    <p style={styles.welcome}>
-                        Bienvenue dans le chat !
-                    </p>
-
-                    <Button
-                        style={user.isDay ? styles.buttonDay : styles.buttonNight}
-                        variant="contained"
-                        color="primary"
-                        onClick={autoriseContinued}
-                    >
-                    Continuez !
-                    </Button>
-
-                    <p>
-                        S'il vous plait, pour continuer cliquez sur le bouton !
-                    </p>
-                </div>
-            )}
+            <p>
+                {texts[user.lang]["please"]}
+            </p>
         </div>
     );
 }

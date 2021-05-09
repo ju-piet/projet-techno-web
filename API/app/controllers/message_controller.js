@@ -18,8 +18,6 @@ exports.index = async (req, res) => {
         if(code === 404) {
             return res.status(404).json({message: 'resource_not_found'})
         }
-
-        console.log("juil", err)
         
         return res.status(500).json({message: err});
     }
@@ -47,10 +45,7 @@ exports.create = async (req, res) => {
         if(body.channel_id) {
 
             try {
-
                 const user = res.locals.token.user
-
-                console.log("moplkk", user)
                 await showChannel(body.channel_id, user);
             } catch(err) {
                 if(err.code === 404) {
@@ -71,8 +66,6 @@ exports.create = async (req, res) => {
         return res.status(400).json({message: 'bad_request'});
     }
 
-    console.log("MOPOPPP")
-
     return createNewMessage(body)
         .then(message =>  res.status(201).json(message))
         .catch(({err}) => res.status(500).json({message: err}));
@@ -83,8 +76,6 @@ exports.update = (req, res) => {
     const body = req.body;
 
     //Blindage du body
-    //Seul le content est modifiable
-
     if(body) {
         if(! body.content) {
             return res.status(400).json({message: 'Le contenu du message est obligatoire.'});
@@ -94,7 +85,6 @@ exports.update = (req, res) => {
     }
 
     //Si pas d'erreur au niveau de la requete, on peut procéder à la modification
-
     return updateMessage(messageId, body)
         .then(message => res.status(200).json(message))
         .catch(({code, err}) => {

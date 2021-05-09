@@ -24,13 +24,16 @@ const styles = {
 	},
 };
 
+// Main 
 const Main = () => {
+	// On initialise notre context
+	const user = useContext(UserContext)
+
+	/* On initialise nos states */
 	const [selectedChannel, setSelectedChannel] = useState(null);
 	const [error, setError] = useState(false);
 
-	const user = useContext(UserContext)
-	console.log('main', error)
-
+	// On affiche le main
 	return (
 		<main className='app-main' style={user.isDay ? styles.mainDay : styles.mainNight}>
 			<Channels handleClick={setSelectedChannel} setError={setError} />

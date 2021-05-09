@@ -30,8 +30,6 @@ const loginUser = async (body) => {
     return new Promise((resolve, reject) => {
         db.get(`usersEmail:${body.email}`, (err, value) => {
             if (err) {
-                //https://github.com/Level/level#get
-                //Niveau code, on peut mieux faire ;)
                 if (err.notFound) {
                     reject({ code: 404 })
                 } else {
@@ -39,13 +37,17 @@ const loginUser = async (body) => {
                 }
             }
 
+            // Si on récupère pas d'utilisateur, on transmet une erreur et un message...
             if(!value){
                 reject({ code: 404, message: "L'email ou mot de passe incorrect(s)" });
                 return;
             }
+            //...sinon...
             else{
+                //... on récupère l'ID du user...
                 const userId = JSON.parse(value);
 
+                //... on récupère le user avec l'ID...
                 db.get(`users:${userId}`, (err, value) => {
                     if (err) {
                         reject({ code: 500, err });
@@ -53,7 +55,9 @@ const loginUser = async (body) => {
     
                     const user = JSON.parse(value);
     
+                    //... si les identifiants de connexion sont bons...
                     if (body.email == user.email && body.password == user.password) {
+                        //... on crée un token
                         jwt.sign({ user }, JWT_PRIVATE_KEY, { expiresIn: '1h' }, (err, token) => {
                             resolve({
                                 access_token: token,
@@ -64,8 +68,7 @@ const loginUser = async (body) => {
                     else {
                         reject({ code: 404, message: "L'email ou mot de passe incorrect(s)" });
                     }
-    
-                    //Le reject de la promesse ne termine pas l'opération
+                    
                     return;
                 });
             }
@@ -110,59 +113,43 @@ const createNewUser = body => {
 };
 
 const showUser = userId => {
-    //on a un code asynchrone, on va donc utiliser les promesses pour nous simplifier la vie...
-    //https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Promise
-    //https://developer.mozilla.org/fr/docs/Web/JavaScript/Guide/Utiliser_les_promesses
     return new Promise((resolve, reject) => {
         db.get(`users:${userId}`, (err, value) => {
             if (err) {
-                //https://github.com/Level/level#get
-                //Niveau code, on peut mieux faire ;)
                 if (err.notFound) {
                     reject({ code: 404 })
                 } else {
                     reject({ code: 500, err });
                 }
 
-                //Le reject de la promesse ne termine pas l'opération
                 return;
             }
-
             resolve(JSON.parse(value));
         });
     });
 };
 
 const showUserByEmail = userEmail => {
-    //on a un code asynchrone, on va donc utiliser les promesses pour nous simplifier la vie...
-    //https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Promise
-    //https://developer.mozilla.org/fr/docs/Web/JavaScript/Guide/Utiliser_les_promesses
     return new Promise((resolve, reject) => {
         db.get(`usersEmail:${userEmail}`, (err, value) => {
             if (err) {
-                //https://github.com/Level/level#get
-                //Niveau code, on peut mieux faire ;)
                 if (err.notFound) {
                     reject({ code: 404 })
                 } else {
                     reject({ code: 500, err });
                 }
 
-                //Le reject de la promesse ne termine pas l'opération
                 return;
             }
 
             db.get(`users:${JSON.parse(value)}`, (err, value) => {
                 if (err) {
-                    //https://github.com/Level/level#get
-                    //Niveau code, on peut mieux faire ;)
                     if (err.notFound) {
                         reject({ code: 404 })
                     } else {
                         reject({ code: 500, err });
                     }
     
-                    //Le reject de la promesse ne termine pas l'opération
                     return;
                 }
     
@@ -188,7 +175,10 @@ const updateUser = (userId, body) => {
                 return;
             }
 
+            // On récupère notre user
             let user = JSON.parse(value);
+
+            /* Modification du user */
             user.name = body.name;
             user.password = body.password; 
             user.isDay = body.isDay;

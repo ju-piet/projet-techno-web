@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AppBar, Toolbar, Typography, Button, Menu, MenuItem, TextField, InputLabel, Select, useRadioGroup, Avatar } from '@material-ui/core'
+import { AppBar, Toolbar, Typography, Button, Menu, MenuItem, TextField, InputLabel, Select, Avatar } from '@material-ui/core'
 import PowerOffIcon from '@material-ui/icons/PowerOff';
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import SwitchCompo from '@material-ui/core/Switch';
 import { UserContext } from '../Contexts'
 import axios from 'axios';
@@ -26,6 +25,7 @@ const styles = {
 	inviteDay: {
 		display: 'flex',
 		flexDirection: 'column',
+		alignItems: 'center',
 		borderBottom: '2px solid black',
 		backgroundColor: '#87CEFA',
 		color: 'black',
@@ -35,6 +35,7 @@ const styles = {
 	inviteNight: {
 		display: 'flex',
 		flexDirection: 'column',
+		alignItems: 'center',
 		borderBottom: '2px solid black',
 		backgroundColor: '#7B68EE',
 		color: 'white',
@@ -52,33 +53,42 @@ const styles = {
 
 
 const texts = {
-
 	"FR": {
-		"label1": "Nom de l'utilisateur",
-		"label2": "label2 fr",
-		"button1": "button1 fr",
-		"quit": "quit fr",
-
-		"p1": "p1",
-		"darkmode": "darkmode fr",
-		"lalangue": "Francais",
-		"lalangue2": "Anglais",
-		"valider": "valider fr",
-
+		"userName": "Nom de l'utilisateur",
+		"userPassword": "Mot de passe",
+		"modif": "Modifier",
+		"quit": "Quitter",
+		"lightmode": "Mode claire",
+		"darkmode": "Mode sombre",
+		"fr": "Francais",
+		"en": "Anglais",
+		"valider": "Sauvegarder les préférences",
+		"addMember":"Ajouter un membre",
+		"choix":"Choisissez une chaine",
+		"emailMember": "Email du membre",
+		"invite":"Inviter un membre",
+		"change":"Changer vos informations",
+		"logout":"Déconnexion",
+		"avatar":"Sélectionnez votre avatar"
 	},
 
 	"EN": {
-		"label1": "Username",
-		"label2": "label2",
-		"button1": "button1",
-		"quit": "quit",
-
-
-		"p1": "p1",
-		"darkmode": "darkmode",
-		"lalangue": "French",
-		"lalangue2": "English",
-		"valider": "valider",
+		"userName": "User name",
+		"userPassword": "User password",
+		"modif": "Modify",
+		"quit": "Quit",
+		"lightmode": "Light mode",
+		"darkmode": "Dark mode",
+		"fr": "French",
+		"en": "English",
+		"valider": "Save preferences",
+		"addMember":"Add a member",
+		"choix":"Choose a channel",
+		"emailMember": "Member email",
+		"invite":"Invite a member",
+		"change":"Changer your informations",
+		"logout":"Logout",
+		"avatar":"Sélectionnez votre avatar"
 	},
 }
 
@@ -102,39 +112,48 @@ export default function Header({ setUser, setContinued}) {
 	);
 }
 
+//Header
 function MyHeader({ setUser, setContinued}) {
-
+	// On initialise notre context user
 	const user = useContext(UserContext);
+
+	// On initialise notre state
 	const [anchorEl, setAnchorEl] = useState(null);
 
-
+	// Lorsqu'on clique sur notre bouton logout...
 	const logout = () => {
+		//... on réinitialise notre user 
 		setUser(null)
+		//... on réinitialise notre bool d'accès à la page welcome 
 		setContinued(false)
+		//... on supprime notre token dans le local storage
 		window.localStorage.removeItem('token');
 	}
 
-
+	//Lorsqu'on clique sur notre profil...
 	const handleClick = (event) => {
+		//... on affiche nos menu items
 		setAnchorEl(event.currentTarget);
 	};
 
+	//Lorsqu'on ferme notre menu...
 	const handleClose = () => {
+		//... on set notre state à null
 		setAnchorEl(null);
 	};
 
+	//On affiche notre header
 	return (
 		<header className="app-header" style={styles.header}>
 			<AppBar position="static" >
 				<Toolbar style={styles.toolbar}>
-					<Typography variant="subtitle1">
+					<Typography variant="h5">
 						AppChat
     				</Typography>
 
 					<div>
 						<Button color="inherit" aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
-							<Avatar alt="Remy Sharp" src="../images/pic1.jpg"/>
-							{user.name}							
+							<Avatar style={{background: 'orange'}}>{user.name[0]}</Avatar>{user.name}					
 						</Button>
 						<Menu
 							id="simple-menu"
@@ -143,39 +162,18 @@ function MyHeader({ setUser, setContinued}) {
 							open={Boolean(anchorEl)}
 							onClose={handleClose}
 						>
-							<Link to="/invite">
-								{user.lang === 'EN' && (
-									<MenuItem onClick={handleClose}>Invite a member</MenuItem>
-								)}
-
-								{user.lang === 'FR' && (
-									<MenuItem onClick={handleClose}>Inviter un membre</MenuItem>
-								)}
+							<Link to="/invite">				
+								<MenuItem onClick={handleClose}>{texts[user.lang]["invite"]}</MenuItem>
 							</Link>
 
 							<Link to="/change">
-								{user.lang === 'EN' && (
-									<MenuItem onClick={handleClose}>Change your informations</MenuItem>
-								)}
-
-								{user.lang === 'FR' && (
-									<MenuItem onClick={handleClose}>Changer tes informations</MenuItem>
-								)}
+								<MenuItem onClick={handleClose}>{texts[user.lang]["change"]}</MenuItem>
 							</Link>
 						</Menu>
-						{user.lang === 'EN' && (
 							<Button color="inherit" onClick={logout}>
 								<PowerOffIcon />
-								Logout
+								{texts[user.lang]["logout"]}
 							</Button>
-						)}
-
-						{user.lang === 'FR' && (
-							<Button color="inherit" onClick={logout}>
-								<PowerOffIcon />
-								Déconnexion
-							</Button>
-						)}
 					</div>
 				</Toolbar>
 			</AppBar>
@@ -183,16 +181,22 @@ function MyHeader({ setUser, setContinued}) {
 	);
 }
 
+// Page invitation d'un membre
 function Invite() {
+	// On initialise notre context user
 	const user = useContext(UserContext);
 
+	/* On initialise les states channel */
 	const [channels, setChannels] = useState([]);
 	const [selectedChannel, setSelectedChannel] = useState([]);
 	const [channelMember, setChannelMember] = useState('');
 	const [channelMemberId, setChannelMemberId] = useState('');
+
+	// On initialise le state message d'info
 	const [message, setMessage] = useState('');
 
 	useEffect(() => {
+		// Lorsqu'on charge le compiosant, on récupère les channels en base
 		axios.get('http://localhost:8000/api/v1/channels', {
 		}).then(response => {
 			setChannels(response.data);
@@ -200,33 +204,35 @@ function Invite() {
 	}, []);
 
 	const addMember = () => {
-		//On va chercher le userId avec son email		
+		//On va chercher le userId avec son email...		
 		axios.get('http://localhost:8000/api/v1/users/' + channelMember).then(response => {
 			setChannelMemberId(response.data.id);
-		})
-			.catch(err => {
-			})
 
-		axios.put('http://localhost:8000/api/v1/channels/' + selectedChannel.id, {
-			name: selectedChannel.name,
-			member: channelMemberId
-		}).then(response => {
-			setMessage(response.data)
-			setChannelMember('')
-		})
-			.catch(err => {
+			//... on update les membre du channel avec le userId récupéré...
+			axios.put('http://localhost:8000/api/v1/channels/' + selectedChannel.id, {
+				name: selectedChannel.name,
+				member: channelMemberId
+			}).then(response => {
+				//... lorsqu'il est ajouté on set le message d'ajout et le membre (car il est ajouté)
+				setMessage(response.data)
+				setChannelMember('')
 			})
+			.catch(err => {
+				console.log(err)
+			})
+		})
+		.catch(err => {
+			console.log(err)
+		})
 	};
 
+	// On affiche la page d'invitation
 	return (
 		<div style={user.isDay ? styles.inviteDay : styles.inviteNight}>
-			{user.lang === 'EN' && (
-				<InputLabel id="demo-controlled-open-select-label">Choose your channel</InputLabel>
-			)}
-
-			{user.lang === 'FR' && (
-				<InputLabel id="demo-controlled-open-select-label">Choisis ton channel</InputLabel>
-			)}
+			
+			<InputLabel id="demo-controlled-open-select-label">
+				{texts[user.lang]["choix"]}
+			</InputLabel>
 
 			<Select
 				variant="outlined"
@@ -244,10 +250,9 @@ function Invite() {
 				}
 
 			</Select>
-			{user.lang === 'EN' && (
 				<div>
 					<TextField
-						label="Member email"
+						label={texts[user.lang]["emailMember"]}
 						variant="outlined"
 						size="small"
 						type="text"
@@ -263,78 +268,49 @@ function Invite() {
 						style={user.isDay ? { backgroundColor: '#6495ED', margin: 5 } : { backgroundColor: '#663399', margin: 5 }}
 						onClick={addMember}
 					>
-						Add a member
+						{texts[user.lang]["addMember"]}
 					</Button>
 
 					{message}
 				</div>
-			)}
 
-			{user.lang === 'FR' && (
-				<div>
-					<TextField
-						label="Email du membre"
-						variant="outlined"
-						size="small"
-						type="text"
-						onChange={(e) => { setChannelMember(e.target.value) }}
-						name="channelMember"
-						style={styles.input}
-						value={channelMember}
-					/>
-
-					<Button
-						variant="contained"
-						color="primary"
-						style={user.isDay ? { backgroundColor: '#6495ED', margin: 5 } : { backgroundColor: '#663399', margin: 5 }}
-						onClick={addMember}
-					>
-						Ajouter un membre
-					</Button>
-
-					{message}
-				</div>
-			)}
 			<Link to="/">
-				{user.lang === 'EN' && (
-					<Button
-						variant="contained"
-						color="primary"
-						style={user.isDay ? { backgroundColor: '#6495ED', width: 375, margin: 5 } : { backgroundColor: '#663399', width: 375, margin: 5 }}
-					>
-						Quit
-					</Button>
-				)}
-
-				{user.lang === 'FR' && (
-					<Button
-						variant="contained"
-						color="primary"
-						style={user.isDay ? { backgroundColor: '#6495ED', width: 375, margin: 5 } : { backgroundColor: '#663399', width: 375, margin: 5 }}
-					>
-						Quitter
-					</Button>
-				)}
+				<Button
+					variant="contained"
+					color="primary"
+					style={user.isDay ? { backgroundColor: '#6495ED', width: 375, margin: 5 } : { backgroundColor: '#663399', width: 375, margin: 5 }}
+				>
+					{texts[user.lang]["quit"]}
+				</Button>
 			</Link>
 		</div>
 	);
 }
 
+// Page de changment d'informations user
 function ChangeUserInfo({ setUser }) {
+	// On initialise le context
 	const user = useContext(UserContext);
 
+	/* On initialise les states user */
 	const [userName, setUserName] = useState('');
 	const [userPassword, setUserPassword] = useState('');
+
+	// On initialise le state message
 	const [message, setMessage] = useState('');
 
+	// Lorsqu'on clique sur le switch du theme...
 	const handleChangeMode = () => {
-		if (user.isDay == true) {
+		//... si le user avait le light mode...
+		if (user.isDay === true) {
+			//... on set le theme user est en dark
 			setUser({
 				...user,
 				isDay: false
 			})
 		}
 		else {
+			//... on set le theme user est en light
 			setUser({
 				...user,
 				isDay: true
@@ -342,54 +318,67 @@ function ChangeUserInfo({ setUser }) {
 		}
 	};
 
+	// Lorsqu'on clique sur le switch de langue...
 	const handleChangeLang = () => {
-		if (user.lang == 'EN') {
+		//... si le user avait la langue en anglais...
+		if (user.lang === 'EN') {
+			//... on set la langue user est en français
 			setUser({
 				...user,
 				lang: 'FR'
 			})
 		}
+		//... si le user avait la langue en français...
 		else {
 			setUser({
+				//... on set la langue user est en anglais
 				...user,
 				lang: 'EN'
 			})
 		}
-
-
 	};
 
-	const validateChange = () => {
+	// Lorsqu'on clique sur le bouton de sauvegarde de préférences...
+	const savePref = () => {
+		//... on update notre user en base...
 		axios.put('http://localhost:8000/api/v1/users/' + user.id, {
 			name: user.name,
 			password: user.password,
 			isDay: user.isDay,
 			lang: user.lang,
-		}).catch((error) => setMessage(
+		})
+		//... si l'update n'est pas possible, on set un message d'erreur
+		.catch((error) => setMessage(
 			error.response.data.message
 		));
 	};
 
+	// Lorsqu'on clique sur le bouton modifier...
 	const changeUser = () => {
+		//... on modifie le user en base
 		axios.put('http://localhost:8000/api/v1/users/' + user.id, {
 			name: userName,
 			password: userPassword,
-		}).then(response => {
+		})
+		//... on set un message avec ce que nous renvoie le back
+		.then(response => {
 			setMessage(response.data.message);
 		})
-			.catch((error) => setMessage(error.response.data.message));
+		//... si l'update n'est pas possible, on set un message d'erreur
+		.catch((error) => setMessage(error.response.data.message));
 	}
 
-	console.log("HEADER", user)
+	const changeAvatar = (name) => {
+		console.log(name)
+	}
 
+	//On affiche notre page changement d'informations
 	return (
-		<div style={{ display: 'flex', justifyContent: 'space-between' }}>
-
-
+		<div style={{ display: 'flex'}}>
 				<div style={user.isDay ? styles.inviteDay : styles.inviteNight}>
 					<TextField
 						style={{ width: 375, margin: 5 }}
-						label={texts[user.lang]["label1"]}
+						label={texts[user.lang]["userName"]}
 						variant="outlined"
 						size="small"
 						type="text"
@@ -400,7 +389,7 @@ function ChangeUserInfo({ setUser }) {
 
 					<TextField
 						style={{ width: 375, margin: 5 }}
-						label={texts[user.lang]["label2"]}
+						label={texts[user.lang]["userPassword"]}
 						variant="outlined"
 						size="small"
 						type="password"
@@ -415,7 +404,7 @@ function ChangeUserInfo({ setUser }) {
 						style={user.isDay ? { backgroundColor: '#6495ED', width: 375, margin: 5 } : { backgroundColor: '#663399', width: 375, margin: 5 }}
 						onClick={changeUser}
 					>
-						{texts[user.lang]["button1"]}
+						{texts[user.lang]["modif"]}
 					</Button>
 
 					<Link to="/">
@@ -432,7 +421,7 @@ function ChangeUserInfo({ setUser }) {
 
 				<div style={user.isDay ? styles.inviteDay : styles.inviteNight}>
 					<div style={styles.switch}>
-						<p>{texts[user.lang]["p1"]}</p>
+						<p>{texts[user.lang]["lightmode"]}</p>
 						<SwitchCompo
 							onChange={handleChangeMode}
 							name="isDay"
@@ -442,25 +431,37 @@ function ChangeUserInfo({ setUser }) {
 						<p>{texts[user.lang]["darkmode"]}</p>
 					</div>
 					<div style={styles.switch}>
-						<p>{texts[user.lang]["lalangue"]}</p>
+						<p>{texts[user.lang]["fr"]}</p>
 						<SwitchCompo
 							onChange={handleChangeLang}
-							checked={user.lang === "FR"}
+							checked={user.lang === "EN"}
 							name="language"
 							inputProps={{ 'aria-label': 'secondary checkbox' }}
 						/>
-						<p>{texts[user.lang]["lalangue2"]}</p>
+						<p>{texts[user.lang]["en"]}</p>
 					</div>
 					<Button
 						variant="contained"
 						color="primary"
 						style={user.isDay ? { backgroundColor: '#6495ED', width: 230 } : { backgroundColor: '#663399', width: 230 }}
-						onClick={validateChange}
+						onClick={savePref}
 					>
 						{texts[user.lang]["valider"]}
 					</Button>
 				</div>
 
+				<div style={user.isDay ? styles.inviteDay : styles.inviteNight}>
+					<h3>{texts[user.lang]["avatar"]}</h3>
+					<Button onClick={() => changeAvatar('/pic1.jpg')}>
+						<Avatar src="/pic1.jpg"/>
+					</Button>
+					<Button onClick={() =>changeAvatar('/pic2.jpg')}>
+						<Avatar src="/pic2.jpg"/>
+					</Button>
+					<Button onClick={() => changeAvatar('/pic3.jpg')}>
+						<Avatar src="/pic3.jpg"/>
+					</Button>
+				</div>
 		</div>
 	);
 };

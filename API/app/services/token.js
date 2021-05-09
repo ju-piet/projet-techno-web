@@ -11,29 +11,27 @@ const extraireTok = headerValue => {
     return matches && matches[2]
 }
 
-//verification  du tokem
+//verification  du token
 const verifTok = (req, res, next) => {
-    //recupÃ©ration du token
+    // Récupération du token
     const token = req.headers.authorization && extraireTok(req.headers.authorization)
 
-    //on a pas de token 
+    // Si on a pas de token...
     if(!token){
+        //... On retourne une requête erreur
         return res.status(401).json({message: 'il manque le token'})
     }
 
-    //verification du token 
+    // Vérification du token 
     jwt.verify(token, JWT_PRIVATE_KEY, (err) => {
-        console.log('token',err)
         if(err){
             return res.status(401).json({message: 'mauvais token'})
         } else {
-
             res.locals.token = jwt.decode(token, JWT_PRIVATE_KEY)
-
+            
             return next()
         }
     })
 };
-
 
 module.exports = verifTok

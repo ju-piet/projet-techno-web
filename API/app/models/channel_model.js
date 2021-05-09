@@ -10,9 +10,9 @@ const listAllChannels = async () => {
             lte: "channels" + String.fromCharCode(":".charCodeAt(0) + 1) + ":messages",
         };
 
-        //https://github.com/Level/level#createReadStream
         db.createReadStream(options)
             .on('data', ({key, value}) => {
+                //On retire nos messages
                 if(!key.match(/messages/)){
                     channels.push(JSON.parse(value));
                 }
@@ -36,39 +36,28 @@ const createNewChannel = body => {
             members: body.members
         };
 
-        console.log('yo', channel)
-
-        //https://github.com/Level/level#put
         // on insère en base de données (ID ==> Channel content)
         db.put(`channels:${channel.id}`, JSON.stringify(channel), (err) => {
             if(err) {
                 reject({code: 500, err});
 
-                //Le reject de la promesse ne termine pas l'opération
                 return;
             }
-
             resolve(channel);
         })
     });
 };
 
 const showChannel = (channelId, user) => {
-    //on a un code asynchrone, on va donc utiliser les promesses pour nous simplifier la vie...
-    //https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Promise
-    //https://developer.mozilla.org/fr/docs/Web/JavaScript/Guide/Utiliser_les_promesses
     return new Promise((resolve, reject) => {
         db.get(`channels:${channelId}`, (err, value) => {
             if(err) {
-                //https://github.com/Level/level#get
-                //Niveau code, on peut mieux faire ;)
                 if(err.notFound) {
                     reject({code: 404})
                 } else {
                     reject({code: 500, err});
                 }
 
-                //Le reject de la promesse ne termine pas l'opération
                 return;
             }
 
@@ -88,15 +77,12 @@ const updateChannel = (channelId, body) => {
     return new Promise((resolve, reject) => {
         db.get(`channels:${channelId}`, (err, value) => {
             if(err) {
-                //https://github.com/Level/level#get
-                //Niveau code, on peut mieux faire ;)
                 if(err.notFound) {
                     reject({code: 404})
                 } else {
                     reject({code: 500, err});
                 }
 
-                //Le reject de la promesse ne termine pas l'opération
                 return;
             }
 
@@ -139,15 +125,12 @@ const deleteChannel = channelId => {
     const getChannelPromise = () => new Promise((resolve, reject) => {
         db.get(`channels:${channelId}`, (err, value) => {
             if(err) {
-                //https://github.com/Level/level#get
-                //Niveau code, on peut mieux faire ;)
                 if(err.notFound) {
                     reject({code: 404})
                 } else {
                     reject({code: 500, err});
                 }
 
-                //Le reject de la promesse ne termine pas l'opération
                 return;
             }
 
@@ -164,7 +147,6 @@ const deleteChannel = channelId => {
             lte: "channels" + String.fromCharCode(":".charCodeAt(0) + 1),
         };
 
-        //https://github.com/Level/level#createReadStream
         db.createReadStream(options)
             .on('data', ({key, value}) => {
                 channelMessagesIds.push(key);

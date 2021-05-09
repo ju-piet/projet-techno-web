@@ -35,56 +35,70 @@ const styles = {
 };
 
 export default function Auth({setUser, setToken, setContinued}) {
+    /* Création de notre router, switch et routes */
     return (
         <Router>
-          <div>
             <Switch>
               <Route exact path="/">
                 <Login setUser={setUser} setToken={setToken} setContinued={setContinued} />
               </Route>
+              
               <Route path="/register">
                 <Register />
               </Route>
             </Switch>
-          </div>
         </Router>
       );
 }
 
+// Page de login
 function Login({setUser, setToken, setContinued}){
+    /* On initialise nos states user */
     const [userEmail, setUserEmail] = useState();
     const [userPassword, setUserPassword] = useState();
-    const [LoginError, setLoginError] = useState(false);
 
-    const onSubmit = e => {
+    // On initialise notre erreur de login
+    const [loginError, setLoginError] = useState(false);
+
+    // Lorsqu'on clique sur le bouton login...
+    const onSubmitLogin = () => {
+        // On poste notre login dans la base afin de vérifier si l'utilisateur existe...
         axios.post('http://localhost:8000/api/v1/users/login', {
             email: userEmail,
             password: userPassword
         })
+        //... s'il existe...
         .then(response => {
+            //... on set notre token
             setToken(response.data.access_token)
+            //... on set notre user
             setUser(
                 response.data.user,
             );
+            //... on set notre bool pour la page welcome
             setContinued(false)
+            //... on set l'erreur de login à true
+            setLoginError(false);
         })
+        //... s'il n'existe pas...
         .catch(err => {
             if (err.status === 404) {
+                //... on set l'erreur de login à true
                 setLoginError(true);
             }
         })
     }
 
+    // On affiche notre page de login
     return (
-        <div>
-            
+        <div>    
             <header style={styles.header}>
                 <h1 style={{ color:'white', padding:5 }}>Please log in !</h1>
             </header>
 
             <form style={styles.form}>
                 <div>
-                    <label for="email">Email :</label><br />
+                    <label htmlFor="email">Email :</label><br />
                     <input
                         onChange={e => setUserEmail(e.target.value)}
                         type="text"
@@ -94,7 +108,7 @@ function Login({setUser, setToken, setContinued}){
                 </div>
 
                 <div>
-                    <label for="password">Password :</label><br />
+                    <label htmlFor="password">Password :</label><br />
                     <input
                         onChange={e => setUserPassword(e.target.value)}
                         type="password"
@@ -104,26 +118,33 @@ function Login({setUser, setToken, setContinued}){
                 </div>
 
                 <div>
-                    <Button variant="contained" style={styles.buttonSignIn} onClick={onSubmit}>
+                    <Button variant="contained" style={styles.buttonSignIn} onClick={onSubmitLogin}>
                         <AccountCircleIcon /> Sign In
                     </Button>
                     <p><Link to="/register">If I don't have an account, please register !</Link></p>
                 </div>
 
-                {LoginError && (<p>Email ou mot de passe incorrecte</p>)}
+                {loginError && (<p>Incorrect email and/or password</p>)}
             </form>
         </div>
     );
 }
 
+// Page de register
 function Register() {
+    /* On initialise nos states user */
     const [newUserName, setnewUserName] = useState('');
     const [newUserEmail, setnewUserEmail] = useState('');
     const [newUserPassword, setnewUserPassword] = useState('');
-    const [message, setMessage] = useState('');
+   
+    // On initialise notre erreur de register
     const [registerError, setRegisterError] = useState(false);
 
-    const onSubmit = e => {
+    // On initialise notre state message
+    const [message, setMessage] = useState('');
+
+    const onSubmitRegister = () => {
+        // On poste notre user en base 
         axios.post('http://localhost:8000/api/v1/users', {
             name: newUserName,
             email: newUserEmail,
@@ -132,18 +153,24 @@ function Register() {
             lang:'EN'
         })
         .then(response => {
+            /* On set nos states */
             setMessage(response.data)
             setnewUserName('')
             setnewUserEmail('')
             setnewUserPassword('')
+            setRegisterError(false)
         })
         .catch(err => {
             if (err.status === 404) {
-                setRegisterError(true);
+                //... on set l'erreur de register à true
+                setRegisterError(true)
+                //... on set notre message
+                setMessage('')
             }
         })
     }
 
+    // On affiche notre page register
     return (
         <div>
             <header style={styles.header}>
@@ -152,7 +179,7 @@ function Register() {
 
             <form style={styles.form}>
                 <div>
-                    <label for="new-name">Your name :</label><br />
+                    <label htmlFor="new-name">Your name :</label><br />
                     <input 
                         onChange={e => setnewUserName(e.target.value)}
                         type="text" 
@@ -163,7 +190,7 @@ function Register() {
                 </div>
 
                 <div>
-                    <label for="email">Your email :</label><br />
+                    <label htmlFor="email">Your email :</label><br />
                     <input 
                         onChange={e => setnewUserEmail(e.target.value)}
                         type="text" 
@@ -174,7 +201,7 @@ function Register() {
                 </div>
 
                 <div>
-                    <label for="password">Your password :</label><br />
+                    <label htmlFor="password">Your password :</label><br />
                     <input 
                         onChange={e => setnewUserPassword(e.target.value)}
                         type="password" 
@@ -185,7 +212,7 @@ function Register() {
                 </div>
 
                 <div>
-                    <Button variant="contained" style={styles.buttonSignIn} onClick={onSubmit}>
+                    <Button variant="contained" style={styles.buttonSignIn} onClick={onSubmitRegister}>
                         <CheckIcon />
                         Validate
                     </Button>
@@ -199,7 +226,7 @@ function Register() {
                 </div>
 
                 <div>
-                    <p>{message}</p>
+                    <p>{message} {registerError && (<p>Incorrect name and/or email and/or password</p>)}</p>
                 </div>
             </form>
         </div>

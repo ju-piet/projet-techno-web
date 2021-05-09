@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
-import { TokenContext, UserContext } from '../Contexts'
+import { UserContext } from '../Contexts'
 import { AppBar, Toolbar, Typography, Button, TextField } from '@material-ui/core'
 import DeleteIcon from '@material-ui/icons/Delete';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -32,7 +32,7 @@ const styles = {
 		flexDirection: 'column',
 		margin: 5,
 		color: '#ffffff',
-		backgroundColor: '#663399'
+		backgroundColor: '#663399',
 	},
 	toolbar: {
 		width: 'fitContent',
@@ -49,10 +49,13 @@ const styles = {
 		flexDirection: 'column',
 		margin: 5,
 	},
-	grp: {
+	grpBtn: {
+		display: 'flex',
+		flexDirection: 'column',
+	},
+	grpText: {
 		display: 'flex',
 		flexDirection: 'row',
-		margin: 5
 	},
 	input: {
 		margin: 5
@@ -77,63 +80,131 @@ const styles = {
 	}
 };
 
+const texts = {
+	"FR": {
+		"createChannel": "CREER UNE NOUVELLE CHAINE",
+		"nameChannel": "Nom de la chaine",
+		"email": "Email du membre",
+		"addMember":"Ajouter un membre",
+		"addChannel":"Ajouter une chaine",
+		"ask":"Voulez vous ajouter ce chaine ?",
+		"name":"Nom : ",
+		"owner":"Créateur : ",
+		"members":"Membres : ",
+		"validate":"Valider",
+		"cancel":"Annuler"
+	},
+
+	"EN": {
+		"createChannel": "CREATE A NEW CHANNEL",
+		"nameChannel": "Channel name",
+		"email": "Member email",
+		"addMember":"Add a member",
+		"addChannel":"Add a channel",
+		"ask":"Do you want add this channel ?",
+		"name":"Name : ",
+		"owner":"Owner : ",
+		"members":"Members : ",
+		"validate":"Validate",
+		"cancel":"Cancel"
+	},
+}
+
 const Channels = ({ handleClick, setError }) => {
-	const [channels, setChannels] = useState([]); //Initialiser à vide avant de pouvoir les récuperer
+	/* On initialise nos states channel */
+	const [channels, setChannels] = useState([]); 
 	const [channelName, setChannelName] = useState('');
 	const [channelMember, setChannelMember] = useState('')
 	const [channelMemberName, setChannelMemberName] = useState([])
 	const [channelMembers, setChannelMembers] = useState([]);
-	const [message, setMessage] = useState('');
-	const [isActivated, setActivate] = useState(false);
-	const [isActivatedPopup, setActivatePopup] = useState(false);
-	const [error2, setError2] = useState(false);
 
+	/* On initialise nos states message */
+	const [messageMember, setMessageMember] = useState('');
+	const [messageChannel, setMessageChannel] = useState('');
+
+	/* On initialise nos states popup */
+	const [isActivatedCreate, setActivate] = useState(false);
+	const [isActivatedPopupValidate, setActivatePopup] = useState(false);
+
+	// On initialise notre contexts
 	const user = useContext(UserContext);
-	const token = useContext(TokenContext);
 
+	// A chaque chargement du composant...
 	useEffect(() => {
-
+		//... on récupère nos channels en base
 		axios.get('http://localhost:8000/api/v1/channels').then(response => {
+			//... on set nos channels
 			setChannels(response.data);
 		})
-	}, []);
+	}, [channels]);
 
+	// Lorsqu'on sélectionne un channel...
 	const onSelectChannel = useCallback(
+		//... on récupère le channel sélectionné en base
 		channel => axios.get('http://localhost:8000/api/v1/channels/' + channel.id)
 			.then(response => {
+				//... on renvoie la réponse au parent du composant (Main)
 				handleClick(response.data)
+				//... on renvoie l'erreur au parent
 				setError(false);
 			})
 			.catch(err =>{
-				console.log('yo')
-				console.log(setError)
+				console.log(err)
+				//... on renvoie l'erreur au parent
 				setError(true);
 			}),
-		[],
+		[handleClick,setError],
 	);
 
+	// Lorsqu'on supprime un channel...
 	const deleteChannel = (channel) => {
+		//... on le supprime en base
         axios.delete('http://localhost:8000/api/v1/channels/' + channel.id);
     }
 
-	const onSubmit = () => {
-		setActivatePopup(true);
+	// Lorsqu'on clique sur le bouton ajouter un channel, on lance une popup...
+	const launchPopup = () => {
+		//... si on a pas rentré un nom de channel
+		if(!channelName){
+			if(user.lang === 'EN'){
+				//... on set un message (en anglais)
+				setMessageChannel('You must give a name to the channel')
+			}
+			else{
+				//... on set un message (en français)
+				setMessageChannel('Vous devez donner un nom à la chaine')
+			}
+		}
+		//... si on a pas rentré un nom de channel
+		else{
+			setActivatePopup(true);
+		}
 	};
 
+	// Lorsqu'on clique sur le bouton valider
 	const publishChannel = () => {
-
+		// On poste le channel en base
 		axios.post('http://localhost:8000/api/v1/channels', {
 			name: channelName,
 			owner: user.id,
 			members: channelMembers,
 		})
 		.then(response => {
+
+			/* On set les informations du channel */
 			setChannelName('');
 			setChannelMember('');
 			setChannelMembers([]);
+
+			/* On set les messages d'information */
+			setMessageMember('');
+			setMessageChannel('');
+
+			/* On set les messages d'information */
 			setActivate(false);
 			setActivatePopup(false);
 	
+			// On récupère les channels
 			axios.get('http://localhost:8000/api/v1/channels', {
 			}).then(response => {
 				setChannels(response.data);
@@ -141,12 +212,14 @@ const Channels = ({ handleClick, setError }) => {
 		})
 	}
 
+	// Lorsqu'on clique sur le bouton annuler
 	const cancelpublish = () => {
+		// On ferme la popup
 		setActivatePopup(false);
 	}
 
 	const createChannel = () => {
-		if (isActivated === false) {
+		if (isActivatedCreate === false) {
 			setActivate(true);
 		}
 		else {
@@ -156,48 +229,74 @@ const Channels = ({ handleClick, setError }) => {
 	};
 
 	const addMember = () => {
-		//On va chercher le userId avec son email		
+		//On récupère le userId avec son email dans la base...		
 		axios.get('http://localhost:8000/api/v1/users/' + channelMember, {
 		}).then(response => {
-			console.log(response.data.name)
-			//On set le channel members avec l'ID
-			setChannelMembers([
-				...channelMembers,
-				response.data.id
-			])
-			setChannelMemberName([
-				...channelMemberName,
-				response.data.name
-			])
-			setMessage('member added!')
+			// si le member n'est pas déja membre...
+			if(!channelMembers.includes(response.data.id)){
+				//... on set la liste des membres avec l'ID du user récupéré
+				setChannelMembers([
+					...channelMembers,
+					response.data.id
+				])
+				//... on set le nom du membre avec le user récupéré
+				setChannelMemberName([
+					...channelMemberName,
+					response.data.name
+				])
+
+				if(user.lang === 'EN'){
+					//... on set le message d'information du membre (anglais)
+					setMessageMember('member added!')
+				}
+				else{
+					//... on set le message d'information du membre (français)
+					setMessageMember('membre ajouté !')
+				}
+			}
+			// sinon si le member est pas déja membre du channel...
+			else{		
+				if(user.lang === 'EN'){
+					//... on set le message d'information du membre (anglais)
+					setMessageMember('member already added!')
+				}
+				else{
+					//... on set le message d'information du membre (français)
+					setMessageMember('membre déjà ajouté !')
+				}
+			}
 		})
 	};
 
+	// On affiche nos channels
 	return (
 		<div style={user.isDay ? styles.channelsDay : styles.channelsNight}>
-
 			<div>
 				{
 					channels.map(channel => (
 						<div style={{display:'flex', flexDirection: 'row', alignItems: 'stretch', width: '100%'}}>
-							<Button style={{width:'100%'}}
+							<Button 
 								variant="contained"
 								color="primary" 
 								key={'but1' + channel.id}
+								fullWidth
 								style={user.isDay ? styles.buttonDay : styles.buttonNight}
 								onClick={() => onSelectChannel(channel)}
 							>
 								{channel.name}
 							</Button>
-							<Button 
-								variant="contained"
-								color="primary" 
-								key={'but2' + channel.id}
-								style={{backgroundColor: '#DC143C', color:'#000000'}}
-								onClick={() => deleteChannel(channel)}
-							>
-							<DeleteIcon />
-						</Button>
+							{channel.owner === user.id &&(
+								<Button 
+									variant="contained"
+									size="small"
+									color="primary" 
+									key={'but2' + channel.id}
+									style={{backgroundColor: '#DC143C', color:'#000000', margin:5}}
+									onClick={() => deleteChannel(channel)}
+								>
+								<DeleteIcon fontSize="small" />
+							</Button>
+							)}
 						</div>
 					))
 				}
@@ -206,206 +305,114 @@ const Channels = ({ handleClick, setError }) => {
 			<div style={styles.addChannel}>
 				<AppBar position="static">
 					<Toolbar>
-						<Typography variant="h7">
-							{user.lang === 'EN' && (
+						<Typography variant="subtitle1">
 								<Button color="inherit" onClick={createChannel}>
 									<ExpandMoreIcon />
-									CREATE A NEW CHANNEL
+									{texts[user.lang]["createChannel"]}
 								</Button>
-							)}
 
-							{user.lang === 'FR' && (
-								<Button color="inherit" onClick={createChannel}>
-									<ExpandMoreIcon />
-									CREER UNE NOUVELLE CHAINE
-								</Button>
-							)}
 						</Typography>
 					</Toolbar>
 				</AppBar>
 
-				{isActivated && (
+				{/*	La popup de création de channel */}
+				{isActivatedCreate && (
 					<div style={styles.infoChannel}>
-						<div style={styles.grp}>
-							{user.lang === 'EN' && (
-								<TextField
-									label="Channel name"
-									variant="outlined"
-									size="small"
-									type="text"
-									onChange={(e) => { setChannelName(e.target.value) }}
-									name="channelName"
-									style={styles.input}
-									value={channelName}
+						<div style={styles.grpBtn}>
+							<TextField
+								label={texts[user.lang]["nameChannel"]}
+								variant="outlined"
+								size="small"
+								type="text"
+								onChange={(e) => { 
+									setChannelName(e.target.value) 
+									setMessageChannel('')
+								}}
+								name="channelName"
+								style={styles.input}
+								value={channelName}
 								/>
-							)}
 
-							{user.lang === 'FR' && (
-								<TextField
-									label="Nom de la chaine"
-									variant="outlined"
-									size="small"
-									type="text"
-									onChange={(e) => { setChannelName(e.target.value) }}
-									name="channelName"
-									style={styles.input}
-									value={channelName}
-								/>
-							)}
+							<TextField
+								label={texts[user.lang]["email"]}
+								variant="outlined"
+								size="small"
+								type="text"
+								onChange={(e) => { 
+									setChannelMember(e.target.value)
+									setMessageMember('')
+								}}
+								name="channelMember"
+								style={styles.input}
+								value={channelMember}
+							/>
 						</div>
 
-						<div >
-							<div>
-								{user.lang === 'EN' && (
-									<TextField
-										label="Member email"
-										variant="outlined"
-										size="small"
-										type="text"
-										onChange={(e) => { setChannelMember(e.target.value) }}
-										name="channelMember"
-										style={styles.input}
-										value={channelMember}
-									/>
-								)}
 
-								{user.lang === 'FR' && (
-									<TextField
-										label="Email du membre"
-										variant="outlined"
-										size="small"
-										type="text"
-										onChange={(e) => { setChannelMember(e.target.value) }}
-										name="channelMember"
-										style={styles.input}
-										value={channelMember}
-									/>
-								)}
-							</div>
-
-							<div >
-								{user.lang === 'EN' && (
-									<Button
-										variant="contained"
-										color="primary"
-										style={user.isDay ? styles.buttonDay : styles.buttonNight}
-										onClick={addMember}
-									>
-										Add a member
-									</Button>
-								)}
-
-								{user.lang === 'FR' && (
-									<Button
-										variant="contained"
-										color="primary"
-										style={user.isDay ? styles.buttonDay : styles.buttonNight}
-										onClick={addMember}
-									>
-										Ajouter un membre
-									</Button>
-								)}
-
-								<p style={styles.input}>{message}</p>
-							</div>
-						</div>
-
-						{user.lang === 'EN' && (
-							<div>
+						<div style={styles.grpText}>
 							<Button
 								variant="contained"
 								color="primary"
 								style={user.isDay ? styles.buttonDay : styles.buttonNight}
-								onClick={onSubmit}
+								onClick={addMember}
 							>
-								Add channel
+								{texts[user.lang]["addMember"]}
 							</Button>
 
-							{error2 && <p>Veuillez ajouter un nom de chaine</p>}
-							</div>
-						)}
+							<p style={user.isDay ? {color:'black'} : {color:'white'}}>{messageMember}</p>
+						</div>
 
-						{user.lang === 'FR' && (
-							<div>
-								<Button
-									variant="contained"
-									color="primary"
-									style={user.isDay ? styles.buttonDay : styles.buttonNight}
-									onClick={onSubmit}
-								>
-									Ajouter un channel
-								</Button>
-								
-								{error2 && <p>Veuillez ajouter un nom de chaine</p>}
-							</div>
-						)}
+						<div>
+							<Button
+								variant="contained"
+								color="primary"
+								style={user.isDay ? styles.buttonDay : styles.buttonNight}
+								onClick={launchPopup}
+							>
+								{texts[user.lang]["addChannel"]}
+							</Button>
 
-						{isActivatedPopup && (
+							<p style={user.isDay ? {color:'black'} : {color:'white'}}>{messageChannel}</p>
+						</div>
+
+						{/*	La popup de validation du channel */}
+						{isActivatedPopupValidate && (
 							<div style={user.isDay ? styles.positionedDay : styles.positionedNight}>
-								{user.lang === 'EN' && (
+								<div>
+									<p style={{ fontSize: 'large' }}>{texts[user.lang]["ask"]}</p>
 									<div>
-										<p style={{ fontSize: 'large' }}>Do you want add this channel ?</p>
-										<div>
-											<p>Name : {channelName}</p>
-											<p>Owner : {user.name}</p>
-											<p>Members : {channelMemberName.join(', ')}</p>
-										</div>
-										<div style={{ display: 'flex', justifyContent: 'space-between' }}>
-											<Button
-												variant="contained"
-												color="primary"
-												style={user.isDay ? styles.buttonDay : styles.buttonNight}
-												onClick={publishChannel}
-											>
-												Validate
-											</Button>
-											<Button
-												variant="contained"
-												color="primary"
-												style={user.isDay ? styles.buttonDay : styles.buttonNight}
-												onClick={cancelpublish}
-											>
-												Cancel
-											</Button>
-										</div>
+										<p>{texts[user.lang]["name"]} {channelName}</p>
+										<p>{texts[user.lang]["owner"]} {user.name}</p>
+										<p>{texts[user.lang]["members"]} {channelMemberName.join(', ')}</p>
 									</div>
-								)}
 
-								{user.lang === 'FR' && (
-									<div>
-										<p style={{ fontSize: 'large' }}>Voulez vous ajouter ce channel ?</p>
-										<div>
-											<p>Nom : {channelName}</p>
-											<p>Créateur : {user.name}</p>
-											<p>Membres : {channelMemberName.join(', ')}</p>
-										</div>
-										<div style={{ display: 'flex', justifyContent: 'space-between' }}>
-											<Button
-												variant="contained"
-												color="primary"
-												style={user.isDay ? styles.buttonDay : styles.buttonNight}
-												onClick={publishChannel}
-											>
-												Valider
-											</Button>
-											<Button
-												variant="contained"
-												color="primary"
-												style={user.isDay ? styles.buttonDay : styles.buttonNight}
-												onClick={cancelpublish}
-											>
-												Annuler
-											</Button>
-										</div>
+									<div style={{ display: 'flex', justifyContent: 'space-between' }}>
+										<Button
+											variant="contained"
+											color="primary"
+											style={user.isDay ? styles.buttonDay : styles.buttonNight}
+											onClick={publishChannel}
+										>
+											{texts[user.lang]["validate"]}
+										</Button>
+
+										<Button
+											variant="contained"
+											color="primary"
+											style={user.isDay ? styles.buttonDay : styles.buttonNight}
+											onClick={cancelpublish}
+										>
+											{texts[user.lang]["cancel"]}
+										</Button>
 									</div>
-								)}
+								</div>
 							</div>
 						)}
 					</div>
 				)}
 			</div>
 		</div>
-	);
+	)
 }
 
 export default Channels;

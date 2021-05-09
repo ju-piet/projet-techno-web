@@ -4,12 +4,9 @@ import Header from './layout/Header';
 import Main from './layout/Main';
 import Footer from './layout/Footer';
 import Auth from './layout/Auth';
+import Welcome from './layout/Welcome';
 import {MessageContextProvider, TokenContext, UserContext} from './Contexts'
 import axios from 'axios';
-import Welcome from './layout/Welcome';
-import Gravatar from 'react-awesome-gravatar';
-import { GravatarOptions } from 'react-awesome-gravatar';
-
 
 const styles = {
     root: {
@@ -25,38 +22,37 @@ const styles = {
     },
 };
 
+// App
 export default function App() {
+    /* On set nos différents states */
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
     const [isContinued, setContinued] = useState(false);
 
-    const options = {
-        size: 50,
-        default:"./images/pic1.jpg",
-    };
-
+    // On set le header avec notre token pour chaque changement de token
     useEffect(() => {
-
         if(token){
             axios.defaults.headers.common['authorization'] = "bearer " + token;
         }
-
     }, [token])
-    console.log('yo', user, isContinued)
 
+    // Si on n'est pas login on arrive sur la page d'authentification
     if (!token || !user) {
         return <Auth setToken={setToken} setUser={setUser} setContinued={setContinued} />
     }
 
-    if(isContinued==false){
+    // Une fois login, on arrive sur la page de bienvenue
+    if(isContinued === false){
         return (
             <Welcome setContinued={setContinued} user={user}/>
         );
     }
 
-    if(isContinued==true){
+    // Une fois qu'on a cliqué sur le bouton, on arrive sur notre application
+    if(isContinued === true){
         return (
             <div className="app" style={styles.root}>
+                {/* On utilise le context pour donner accès à certaines données */}
                 <MessageContextProvider>
                     <UserContext.Provider value={user}>
                         <TokenContext.Provider value={token}>
@@ -66,7 +62,8 @@ export default function App() {
                         </TokenContext.Provider>
                     </UserContext.Provider>
                 </MessageContextProvider>
-            </div>);
+            </div>
+        );
     }
 
 }
